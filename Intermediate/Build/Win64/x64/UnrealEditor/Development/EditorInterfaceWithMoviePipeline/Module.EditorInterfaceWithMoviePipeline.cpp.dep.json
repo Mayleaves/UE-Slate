@@ -1,0 +1,15 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "f:\\ue5_5_porjects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\editorinterfacewithmoviepipeline\\module.editorinterfacewithmoviepipeline.cpp",
+        "ProvidedModule": "",
+        "PCH": "f:\\ue5_5_porjects\\cisai_sd_factory\\intermediate\\build\\win64\\x64\\cisai_sd_factoryeditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.cpp20.h.pch",
+        "Includes": [
+            "f:\\ue5_5_porjects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\editorinterfacewithmoviepipeline\\definitions.editorinterfacewithmoviepipeline.h",
+            "f:\\ue5_5_porjects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\editorinterfacewithmoviepipeline\\permoduleinline.gen.cpp",
+            "e:\\epic games\\ue_5.5\\engine\\source\\runtime\\core\\public\\hal\\permoduleinline.inl"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

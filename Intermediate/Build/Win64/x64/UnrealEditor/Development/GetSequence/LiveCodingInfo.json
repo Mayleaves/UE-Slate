@@ -1,0 +1,9 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.GetSequence.cpp.obj": [
+			"PerModuleInline.gen.cpp.obj",
+			"GetSequence.cpp.obj"
+		]
+	}
+}

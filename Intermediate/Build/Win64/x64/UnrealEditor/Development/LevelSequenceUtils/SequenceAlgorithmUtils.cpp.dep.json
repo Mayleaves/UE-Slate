@@ -1,0 +1,31 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\levelsequenceutils\\private\\sequencealgorithmutils.cpp",
+        "ProvidedModule": "",
+        "PCH": "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\intermediate\\build\\win64\\x64\\cisai_sd_factoryeditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.valexpapi.cpp20.inclorderunreal5_5.h.pch",
+        "Includes": [
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\levelsequenceutils\\definitions.levelsequenceutils.h",
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\levelsequenceutils\\public\\sequencealgorithmutils.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\cinematiccamera\\public\\cinecameraactor.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\engine\\classes\\camera\\cameraactor.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\cameraactor.generated.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\cinematiccamera\\uht\\cinecameraactor.generated.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\imagewrapper\\public\\iimagewrapper.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\imagewrapper\\public\\imagewrapperoutputtypes.h",
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\commontypes\\public\\menutypes.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\engine\\public\\engineutils.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\engine\\classes\\engine\\staticmeshactor.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\staticmeshactor.generated.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\cinematiccamera\\public\\cinecameracomponent.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\engine\\classes\\camera\\cameracomponent.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\cameracomponent.generated.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\cinematiccamera\\public\\cinecamerasettings.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\cinematiccamera\\uht\\cinecamerasettings.generated.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\cinematiccamera\\uht\\cinecameracomponent.generated.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\imagewrapper\\public\\iimagewrappermodule.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

@@ -1,0 +1,14 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.InteractButtons.cpp.obj": [
+			"InteractButtons.init.gen.cpp.obj",
+			"MyDirectoryData.gen.cpp.obj",
+			"PerModuleInline.gen.cpp.obj",
+			"InteractButtons.cpp.obj",
+			"InteractButtonsUtils.cpp.obj",
+			"MyDirectoryData.cpp.obj",
+			"MyPositiveActionButton.cpp.obj"
+		]
+	}
+}

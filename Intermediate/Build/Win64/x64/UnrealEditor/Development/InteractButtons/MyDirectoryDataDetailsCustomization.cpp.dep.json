@@ -1,0 +1,24 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\interactbuttons\\private\\mydirectorydatadetailscustomization.cpp",
+        "ProvidedModule": "",
+        "PCH": "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\intermediate\\build\\win64\\x64\\cisai_sd_factoryeditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.valexpapi.cpp20.inclorderunreal5_5.h.pch",
+        "Includes": [
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\interactbuttons\\definitions.interactbuttons.h",
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\interactbuttons\\private\\mydirectorydatadetailscustomization.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\editor\\propertyeditor\\public\\idetailcustomization.h",
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\interactbuttons\\private\\mydirectorydata.h",
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\intermediate\\build\\win64\\unrealeditor\\inc\\interactbuttons\\uht\\mydirectorydata.generated.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\editor\\propertyeditor\\public\\detaillayoutbuilder.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\editor\\propertyeditor\\public\\idetailpropertyrow.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\editor\\propertyeditor\\public\\detailcategorybuilder.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\editor\\propertyeditor\\public\\idetailcustomnodebuilder.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\editor\\propertyeditor\\public\\detailbuildertypes.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\editor\\propertyeditor\\public\\propertyeditorcopypaste.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\editor\\propertyeditor\\public\\detailwidgetrow.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

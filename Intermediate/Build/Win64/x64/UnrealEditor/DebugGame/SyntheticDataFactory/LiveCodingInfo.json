@@ -1,0 +1,11 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.SyntheticDataFactory.cpp.obj": [
+			"PerModuleInline.gen.cpp.obj",
+			"SyntheticDataFactory.cpp.obj",
+			"SyntheticDataFactoryCommands.cpp.obj",
+			"SyntheticDataFactoryStyle.cpp.obj"
+		]
+	}
+}

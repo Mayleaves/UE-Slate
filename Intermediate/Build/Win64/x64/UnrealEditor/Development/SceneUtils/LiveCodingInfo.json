@@ -1,0 +1,9 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.SceneUtils.cpp.obj": [
+			"PerModuleInline.gen.cpp.obj",
+			"SceneUtils.cpp.obj"
+		]
+	}
+}

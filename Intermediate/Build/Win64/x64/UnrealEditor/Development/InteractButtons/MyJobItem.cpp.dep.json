@@ -1,0 +1,15 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\interactbuttons\\public\\myjobitem.cpp",
+        "ProvidedModule": "",
+        "PCH": "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\intermediate\\build\\win64\\x64\\cisai_sd_factoryeditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.valexpapi.cpp20.inclorderunreal5_5.h.pch",
+        "Includes": [
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\interactbuttons\\definitions.interactbuttons.h",
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\intermediate\\build\\win64\\x64\\cisai_sd_factoryeditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.valexpapi.cpp20.inclorderunreal5_5.h",
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\interactbuttons\\public\\myjobitem.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

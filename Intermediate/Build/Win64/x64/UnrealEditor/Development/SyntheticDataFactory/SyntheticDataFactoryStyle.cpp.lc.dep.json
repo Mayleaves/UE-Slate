@@ -1,0 +1,25 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\syntheticdatafactory\\private\\syntheticdatafactorystyle.cpp",
+        "ProvidedModule": "",
+        "PCH": "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\intermediate\\build\\win64\\x64\\cisai_sd_factoryeditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.valexpapi.cpp20.inclorderunreal5_5.h.pch",
+        "Includes": [
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\syntheticdatafactory\\definitions.syntheticdatafactory.h",
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\syntheticdatafactory\\public\\syntheticdatafactorystyle.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\slatecore\\public\\styling\\slatestyleregistry.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\engine\\public\\slate\\slategameresources.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\projects\\public\\interfaces\\ipluginmanager.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\projects\\public\\plugindescriptor.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\projects\\public\\custombuildsteps.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\projects\\public\\localizationdescriptor.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\projects\\public\\moduledescriptor.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\projects\\public\\plugindisalloweddescriptor.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\projects\\public\\pluginreferencedescriptor.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\projects\\public\\versescope.h",
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\slatecore\\public\\styling\\slatestylemacros.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

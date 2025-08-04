@@ -1,0 +1,10 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.AssetSelectorModule.cpp.obj": [
+			"PerModuleInline.gen.cpp.obj",
+			"AssetSelectorModule.cpp.obj",
+			"SAssetSelectorWidget.cpp.obj"
+		]
+	}
+}

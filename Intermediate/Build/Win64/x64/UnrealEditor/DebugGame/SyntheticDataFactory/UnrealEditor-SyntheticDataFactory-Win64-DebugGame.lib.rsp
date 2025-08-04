@@ -1,0 +1,15 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-SyntheticDataFactory-Win64-DebugGame.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"F:\UE5_5_porjects\CISAI_SD_Factory\Intermediate\Build\Win64\x64\CISAI_SD_FactoryEditor\DebugGame\UnrealEd\SharedPCH.UnrealEd.Project.NonOptimized.ValApi.Cpp20.h.obj"
+"F:\UE5_5_porjects\CISAI_SD_Factory\Plugins\SyntheticDataFactory\Intermediate\Build\Win64\x64\UnrealEditor\DebugGame\SyntheticDataFactory\Module.SyntheticDataFactory.cpp.obj"
+"F:\UE5_5_porjects\CISAI_SD_Factory\Plugins\SyntheticDataFactory\Intermediate\Build\Win64\x64\UnrealEditor\DebugGame\SyntheticDataFactory\SyntheticDataFactory.cpp.obj"
+"F:\UE5_5_porjects\CISAI_SD_Factory\Plugins\SyntheticDataFactory\Intermediate\Build\Win64\x64\UnrealEditor\DebugGame\SyntheticDataFactory\SyntheticDataFactoryCommands.cpp.obj"
+"F:\UE5_5_porjects\CISAI_SD_Factory\Plugins\SyntheticDataFactory\Intermediate\Build\Win64\x64\UnrealEditor\DebugGame\SyntheticDataFactory\SyntheticDataFactoryStyle.cpp.obj"
+"F:\UE5_5_porjects\CISAI_SD_Factory\Plugins\SyntheticDataFactory\Intermediate\Build\Win64\x64\UnrealEditor\DebugGame\SyntheticDataFactory\Default.rc2.res"
+/OUT:"F:\UE5_5_porjects\CISAI_SD_Factory\Plugins\SyntheticDataFactory\Intermediate\Build\Win64\x64\UnrealEditor\DebugGame\SyntheticDataFactory\UnrealEditor-SyntheticDataFactory-Win64-DebugGame.lib"

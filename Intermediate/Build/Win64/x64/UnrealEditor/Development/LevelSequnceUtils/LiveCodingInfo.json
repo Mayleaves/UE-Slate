@@ -1,0 +1,9 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.LevelSequnceUtils.cpp.obj": [
+			"PerModuleInline.gen.cpp.obj",
+			"LevelSequnceUtils.cpp.obj"
+		]
+	}
+}

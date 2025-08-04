@@ -1,0 +1,12 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-CommonTypes.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Intermediate/Build/Win64/x64/CISAI_SD_FactoryEditor/Development/UnrealEd/SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.InclOrderUnreal5_5.h.obj"
+"D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Intermediate/Build/Win64/x64/UnrealEditor/Development/CommonTypes/Module.CommonTypes.cpp.obj"
+"D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Intermediate/Build/Win64/x64/UnrealEditor/Development/CommonTypes/Default.rc2.res"
+/OUT:"D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Intermediate/Build/Win64/x64/UnrealEditor/Development/CommonTypes/UnrealEditor-CommonTypes.lib"

@@ -1,0 +1,8 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.EditorInterfaceWithMoviePipeline.cpp.obj": [
+			"PerModuleInline.gen.cpp.obj"
+		]
+	}
+}

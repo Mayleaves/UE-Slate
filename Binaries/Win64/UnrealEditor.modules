@@ -1,0 +1,12 @@
+{
+	"BuildId": "43139311",
+	"Modules": 
+	{
+		"AssetSelector": "UnrealEditor-AssetSelector.dll",
+		"CommonTypes": "UnrealEditor-CommonTypes.dll",
+		"GetSequence": "UnrealEditor-GetSequence.dll",
+		"InteractButtons": "UnrealEditor-InteractButtons.dll",
+		"LevelSequenceUtils": "UnrealEditor-LevelSequenceUtils.dll",
+		"SyntheticDataFactory": "UnrealEditor-SyntheticDataFactory.dll"
+	}
+}
