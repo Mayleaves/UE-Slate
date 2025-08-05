@@ -26,9 +26,9 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "AssetSelector",
-      "Type": "Editor",
-      "LoadingPhase": "Default"
+      "Name": "OpenCVForUnreal",
+      "Type": "Runtime",
+      "LoadingPhase": "PostConfigInit"
     },
     {
       "Name": "CommonTypes",

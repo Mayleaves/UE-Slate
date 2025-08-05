@@ -283,10 +283,10 @@
 /I "Editor/SceneDepthPickerMode/Public"
 /I "../Intermediate/Build/Win64/UnrealEditor/Inc/AnimationEditMode/UHT"
 /I "Editor/AnimationEditMode/Public"
-/I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Source"
-/I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Source/CommonTypes/Public"
 /I "../Intermediate/Build/Win64/UnrealEditor/Inc/CinematicCamera/UHT"
 /I "Runtime/CinematicCamera/Public"
+/I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Source"
+/I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Source/CommonTypes/Public"
 /I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Source/LevelSequenceUtils/Public"
 /I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Intermediate/Build/Win64/x64/CISAI_SD_FactoryEditor/Development/UnrealEd"
 /external:W0

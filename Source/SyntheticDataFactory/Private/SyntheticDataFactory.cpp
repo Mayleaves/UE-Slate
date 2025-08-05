@@ -6,7 +6,6 @@
 #include "SyntheticDataFactory.h"
 #include "SyntheticDataFactoryStyle.h"
 #include "SyntheticDataFactoryCommands.h"
-#include "AssetSelector.h" // 包含AssetSelector模块的头文件
 #include "InteractButtonsUtils.h"
 
 #include "Widgets/Docking/SDockTab.h"

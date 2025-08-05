@@ -40,6 +40,7 @@ public class LevelSequenceUtils : ModuleRules
 				"UnrealEd",
 				"CinematicCamera",
 				"ImageWrapper",
+				"OpenCVForUnreal",
 				// ... add private dependencies that you statically link with here ...	
 			]
 		);

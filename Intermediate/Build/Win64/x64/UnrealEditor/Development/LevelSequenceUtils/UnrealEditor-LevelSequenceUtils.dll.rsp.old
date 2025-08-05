@@ -47,6 +47,7 @@
 "../Intermediate/Build/Win64/x64/UnrealEditor/Development/CinematicCamera/UnrealEditor-CinematicCamera.lib"
 "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Intermediate/Build/Win64/x64/UnrealEditor/Development/CommonTypes/UnrealEditor-CommonTypes.lib"
 "../Intermediate/Build/Win64/x64/UnrealEditor/Development/UnrealEd/UnrealEditor-UnrealEd.lib"
+"../Intermediate/Build/Win64/x64/UnrealEditor/Development/ImageWrapper/UnrealEditor-ImageWrapper.lib"
 "../Intermediate/Build/Win64/x64/UnrealEditor/Development/Core/UnrealEditor-Core.lib"
 "../Intermediate/Build/Win64/x64/UnrealEditor/Development/MeshDescription/UnrealEditor-MeshDescription.lib"
 "../Intermediate/Build/Win64/x64/UnrealEditor/Development/StaticMeshDescription/UnrealEditor-StaticMeshDescription.lib"

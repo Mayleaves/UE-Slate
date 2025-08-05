@@ -55,10 +55,9 @@ public class SyntheticDataFactory : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				"AssetSelector", // todo 测试用，可删
 				"InteractButtons",
 				"UnrealEd", // 编辑器相关模块
-				"Sequencer" // 直接依赖Sequencer模块
+				"Sequencer", // 直接依赖Sequencer模块
 				// ... add private dependencies that you statically link with here ...	
 			}
 		);

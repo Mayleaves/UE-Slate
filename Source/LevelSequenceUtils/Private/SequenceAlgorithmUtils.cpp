@@ -10,6 +10,9 @@
 #include "CineCameraComponent.h"
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/imgproc.hpp"
+#include "opencv2/core.hpp"
 
 void FSequenceAlgorithmUtils::CollectCheckedCineCameraData(const FName& CameraName, FCineCameraData& OutCameraData)
 {
@@ -164,32 +167,35 @@ void FSequenceAlgorithmUtils::CollectCheckedStaticMeshData(const TArray<FName>& 
     }
 }
 
-void FSequenceAlgorithmUtils::ProjectMeshVerticesToCameraPlane(const FCineCameraData& CameraData, const TArray<FStaticMeshData>& MeshArray)
+void FSequenceAlgorithmUtils::ProjectMeshVerticesToCameraPlane(const FCineCameraData& CameraData, const TArray<FStaticMeshData>& MeshArray, TMap<FName, FMeshBoundsData>& MeshBoundsMap) const
 {
+    // 清空旧的MeshBoundsMap，确保每帧只存当前帧数据
+    MeshBoundsMap.Empty();
+
     for (const FStaticMeshData& MeshData : MeshArray)
     {
-        UE_LOG(LogTemp, Log, TEXT("==== Camera: %s 与 Mesh: %s ===="), *CameraData.Label, *MeshData.Label);
+       UE_LOG(LogTemp, Log, TEXT("==== Camera: %s 与 Mesh: %s ===="), *CameraData.Label, *MeshData.Label);
         
         float LocalNormXMin = FLT_MAX;
         float LocalNormXMax = -FLT_MAX;
         float LocalNormYMin = FLT_MAX;
         float LocalNormYMax = -FLT_MAX;
-        
+
         FTransform CamTransform(CameraData.Rotation, CameraData.Location);
         FTransform CamInvTransform = CamTransform.Inverse();
 
         for (int32 i = 0; i < MeshData.LocalVertices.Num(); ++i)
         {
             // 1：StaticMesh 坐标变换（cm）
-            FVector WorldPos = MeshData.WorldMatrix.TransformPosition(FVector(MeshData.LocalVertices[i]));  // 补 1
+            FVector WorldPos = MeshData.WorldMatrix.TransformPosition(FVector(MeshData.LocalVertices[i]));
             const FVector VertexCameraSpace = CamInvTransform.TransformPosition(WorldPos);
-            
-            // UE_LOG(LogTemp, Log, TEXT("   顶点[%d]: 局域坐标(%.2f, %.2f, %.2f) → 世界坐标(%.2f, %.2f, %.2f) → 相机坐标(%.2f, %.2f, %.2f)"),
-            //     i,
-            //     MeshData.LocalVertices[i].X, MeshData.LocalVertices[i].Y, MeshData.LocalVertices[i].Z,
-            //     WorldPos.X, WorldPos.Y, WorldPos.Z,
-            //     VertexCameraSpace.X, VertexCameraSpace.Y, VertexCameraSpace.Z);
-            
+
+                UE_LOG(LogTemp, Log, TEXT("   顶点[%d]: 局域坐标(%.2f, %.2f, %.2f) → 世界坐标(%.2f, %.2f, %.2f) → 相机坐标(%.2f, %.2f, %.2f)"),
+                    i,
+                    MeshData.LocalVertices[i].X, MeshData.LocalVertices[i].Y, MeshData.LocalVertices[i].Z,
+                    WorldPos.X, WorldPos.Y, WorldPos.Z,
+                    VertexCameraSpace.X, VertexCameraSpace.Y, VertexCameraSpace.Z);
+
             // 2：投影变化（相似三角形计算）cm
             if (VertexCameraSpace.X > 0.f)  // Camera 局域坐标系：X > 0 表示在相机前方
             {
@@ -198,40 +204,41 @@ void FSequenceAlgorithmUtils::ProjectMeshVerticesToCameraPlane(const FCineCamera
                 const float ImagePlaneY = F * (VertexCameraSpace.Z / VertexCameraSpace.X);
 
                 // 图片默认坐标系 cm
-                const float ImageX = ImagePlaneX + HalfW; 
+                const float ImageX = ImagePlaneX + HalfW;
                 const float ImageY = HalfH - ImagePlaneY;
-                
+
                 // 归一化（0-1范围）cm
                 const float NormX = ImageX / (2.0f * HalfW);
                 const float NormY = ImageY / (2.0f * HalfH);
-                
-                // UE_LOG(LogTemp, Log, TEXT("           成像平面坐标(%.2f, %.2f) → 图片默认坐标系(%.2f, %.2f) → 归一化坐标(%.2f, %.2f)"),
-                //     ImagePlaneX, ImagePlaneY, ImageX, ImageY, NormX, NormY);
-                
+
+                UE_LOG(LogTemp, Log, TEXT("           成像平面坐标(%.2f, %.2f) → 图片默认坐标系(%.2f, %.2f) → 归一化坐标(%.2f, %.2f)"),
+                    ImagePlaneX, ImagePlaneY, ImageX, ImageY, NormX, NormY);
+
                 LocalNormXMin = FMath::Min(LocalNormXMin, NormX);
                 LocalNormXMax = FMath::Max(LocalNormXMax, NormX);
                 LocalNormYMin = FMath::Min(LocalNormYMin, NormY);
                 LocalNormYMax = FMath::Max(LocalNormYMax, NormY);
             }
-            else
-            {
-                // UE_LOG(LogTemp, Log, TEXT("           [被剔除：X <= 0]"));
-            }
+                else
+                {
+                    UE_LOG(LogTemp, Log, TEXT("           [被剔除：X <= 0]"));
+                }
         }
+
         // Step 1: 判断是否完全越界（均小于0或均大于1直接舍弃）
         if (LocalNormXMax < 0.f || LocalNormXMin > 1.f || LocalNormYMax < 0.f || LocalNormYMin > 1.f)
         {
             UE_LOG(LogTemp, Warning, TEXT("   %s Mesh 超出成像平面，舍弃。"), *MeshData.Label);
             continue; // 舍弃本 mesh
         }
-        
+
         // Step 2: 修正边界到[0, 1]范围
         const float ClampedNormXMin = FMath::Clamp(LocalNormXMin, 0.f, 1.f);
         const float ClampedNormXMax = FMath::Clamp(LocalNormXMax, 0.f, 1.f);
         const float ClampedNormYMin = FMath::Clamp(LocalNormYMin, 0.f, 1.f);
         const float ClampedNormYMax = FMath::Clamp(LocalNormYMax, 0.f, 1.f);
 
-        // Step 3: 存入 MeshBoundsMap
+        // Step 3: 存入MeshBoundsMap
         MeshBoundsMap.Add(
             MeshData.Name,
             FMeshBoundsData(
@@ -243,8 +250,8 @@ void FSequenceAlgorithmUtils::ProjectMeshVerticesToCameraPlane(const FCineCamera
                 ClampedNormYMax
             )
         );
-        UE_LOG(LogTemp, Log, TEXT("   边界统计: NormXMin=%.3f, NormXMax=%.3f, NormYMin=%.3f, NormYMax=%.3f"),
-                ClampedNormXMin, ClampedNormXMax, ClampedNormYMin, ClampedNormYMax);
+        UE_LOG(LogTemp, Log, TEXT("   边界统计: %s NormXMin=%.3f, NormXMax=%.3f, NormYMin=%.3f, NormYMax=%.3f"),
+            *MeshData.Label, ClampedNormXMin, ClampedNormXMax, ClampedNormYMin, ClampedNormYMax);
     }
 }
 
@@ -355,19 +362,55 @@ void FSequenceAlgorithmUtils::SavePixelBoundsToTxt(const FString& SaveDirectoryP
     FFileHelper::SaveStringArrayToFile(OutputLines, *SaveFilePath);
 }
 
-void FSequenceAlgorithmUtils::CollectCameraSequenceFrameMetadata(const FString& SourceDirectoryPath, const FString& SaveDirectoryPath) const
+void FSequenceAlgorithmUtils::SavePixelBoundsImage(const FString& SaveDirectoryPath, const FImageMetadata& ImageMeta)
 {
-    TArray<FImageMetadata> ImageMetadataArray;
-    CollectImageMetadata(SourceDirectoryPath, ImageMetadataArray);
+    // 构造保存目录路径
+    const FString ImagePath = ImageMeta.Path;
+    const FString ImageName = ImageMeta.Label;
+    const FString BoxedImagePath = FPaths::Combine(SaveDirectoryPath, ImageName + TEXT("_boxed.png"));
 
-    for (FImageMetadata& ImageMeta : ImageMetadataArray)
+    // 加载图片
+    cv::Mat Img = cv::imread(TCHAR_TO_UTF8(*ImagePath));
+    if (Img.empty()) return;
+
+    // 绘制像素边界框
+    for (const FPixelBoundResult& PixelBound : ImageMeta.PixelBoundsArray)
     {
-        UE_LOG(LogTemp, Log, TEXT("[图片: %s] 宽=%d, 高=%d"), *ImageMeta.Label, ImageMeta.Width, ImageMeta.Height);
-        
-        CalculateMeshPixelBounds(ImageMeta, MeshBoundsMap);
-        SavePixelBoundsToTxt(SaveDirectoryPath, ImageMeta);
+        const int Xmin = FMath::RoundToInt(PixelBound.XMinPixel);
+        const int Xmax = FMath::RoundToInt(PixelBound.XMaxPixel);
+        const int Ymin = FMath::RoundToInt(PixelBound.YMinPixel);
+        const int Ymax = FMath::RoundToInt(PixelBound.YMaxPixel);
+
+        // OpenCV坐标格式：(左上),(右下)
+        cv::rectangle(
+            Img, 
+            cv::Point(Xmin, Ymin), 
+            cv::Point(Xmax, Ymax), 
+            cv::Scalar(0, 255, 0), // 绿色
+            2 // 线宽
+        );
     }
-    UE_LOG(LogTemp, Log, TEXT("在目录 '%s' 中找到并处理了 %d 张图片"), *SourceDirectoryPath, ImageMetadataArray.Num());
+    
+    // 保存处理后的图片
+    cv::imwrite(TCHAR_TO_UTF8(*BoxedImagePath), Img);
 }
 
-// todo 用 opencv 根据处理后的像素坐标边界生成标注图片
+void FSequenceAlgorithmUtils::DoLabelingForFrame(
+    const FName& CameraMenuRadioButton,
+    const TArray<FName>& CheckedFolders,
+    TMap<FName, FMeshBoundsData>& MeshBoundsMap,
+    FImageMetadata& ImageMeta,
+    const FString& SavePath)
+{
+    FCineCameraData CameraData;
+    TArray<FStaticMeshData> MeshArray;
+
+    CollectCheckedCineCameraData(CameraMenuRadioButton, CameraData);
+    CollectCheckedStaticMeshData(CheckedFolders, MeshArray);
+    ProjectMeshVerticesToCameraPlane(CameraData, MeshArray, MeshBoundsMap);
+
+    UE_LOG(LogTemp, Log, TEXT("[图片: %s] 宽=%d, 高=%d"), *ImageMeta.Label, ImageMeta.Width, ImageMeta.Height);
+    CalculateMeshPixelBounds(ImageMeta, MeshBoundsMap);
+    SavePixelBoundsToTxt(SavePath, ImageMeta);
+    SavePixelBoundsImage(SavePath, ImageMeta);
+}

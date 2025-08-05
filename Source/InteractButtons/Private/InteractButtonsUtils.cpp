@@ -215,7 +215,7 @@ void SInteractButtonsUtils::InitializeFileDirectory()
 	);
 	
 	// 用自定义默认对象填充
-	FileSettingObject = NewObject<UMyDirectoryData>();  // todo 获取地址：FileSettingObject->SourceDirectory.Path、FileSettingObject->SaveDirectory.Path
+	FileSettingObject = NewObject<UMyDirectoryData>();
 	FileDirectoryWidget->SetObject(FileSettingObject.Get());
 }
 
@@ -1225,11 +1225,31 @@ FReply SInteractButtonsUtils::OnStartLabelingClicked()
 		return FReply::Handled();
 	}
 
-	// 2. 初始化标注状态
+	// 2. 清空保存目录
+	{
+		IFileManager& FileManager = IFileManager::Get();
+		// 清空所有 txt
+		TArray<FString> TxtFiles;
+		FileManager.FindFiles(TxtFiles, *FPaths::Combine(SavePath, TEXT("*.txt")), true, false);
+		for(const FString& File : TxtFiles)
+			FileManager.Delete(*FPaths::Combine(SavePath, File));
+		// 清空所有 _boxed 图片
+		TArray<FString> BoxedFiles;
+		FileManager.FindFiles(BoxedFiles, *FPaths::Combine(SavePath, TEXT("*_boxed.*")), true, false);
+		for(const FString& File : BoxedFiles)
+			FileManager.Delete(*FPaths::Combine(SavePath, File));
+	}
+
+	// 3. 收集所有图片元数据
+	AllImageMetadata.Empty();
+	FSequenceAlgorithmUtils AlgorithmUtils;
+	AlgorithmUtils.CollectImageMetadata(SourcePath, AllImageMetadata);
+	
+	// 4. 初始化标注状态
 	CurrentFrame = CurrentStartFrame;
 	ProgressPercent = 0.0f;
 
-	// 3. 启动定时器，每隔0.05秒处理一帧
+	// 5. 启动定时器，每隔 0.05 秒处理一帧
 	if (GWorld)
 	{
 		GWorld->GetTimerManager().SetTimer(
@@ -1255,7 +1275,15 @@ void SInteractButtonsUtils::DoLabelingStep()
 		UE_LOG(LogTemp, Warning, TEXT("标注完成! 总帧数: %d"), CurrentEndFrame - CurrentStartFrame + 1);
 		return;
 	}
-
+	
+	const int32 ImageIndex = CurrentFrame - CurrentStartFrame; 
+	if (ImageIndex < 0 || ImageIndex >= AllImageMetadata.Num())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("帧号超出图片范围，跳过！"));
+		++CurrentFrame;
+		return;
+	}
+	
 	// 1. 设置 Sequencer 到当前帧
 	const FFrameTime FrameTime(CurrentFrame);
 	const FFrameNumber InternalFrame = FFrameRate::TransformTime(FrameTime, DisplayRate, TickResolution).FloorToFrame();
@@ -1273,12 +1301,14 @@ void SInteractButtonsUtils::DoLabelingStep()
 	// 2. 标注逻辑
 	UE_LOG(LogTemp, Warning, TEXT("==== Frame: %d ===="), CurrentFrame);
 	FSequenceAlgorithmUtils AlgorithmUtils;
-	FCineCameraData CameraData;
-	TArray<FStaticMeshData> MeshArray;
-	AlgorithmUtils.CollectCheckedCineCameraData(CameraMenuRadioButton, CameraData);
-	AlgorithmUtils.CollectCheckedStaticMeshData(CheckedFolders, MeshArray);
-	AlgorithmUtils.ProjectMeshVerticesToCameraPlane(CameraData, MeshArray);
-	AlgorithmUtils.CollectCameraSequenceFrameMetadata(SourcePath, SavePath);
+	FImageMetadata& ImageMeta = AllImageMetadata[ImageIndex];
+	AlgorithmUtils.DoLabelingForFrame(
+		CameraMenuRadioButton,
+		CheckedFolders,
+		MeshBoundsMap,
+		ImageMeta,
+		SavePath
+	);
 
 	// 3. 更新进度百分比
 	ProgressPercent = static_cast<float>(CurrentFrame - CurrentStartFrame + 1) / static_cast<float>(CurrentEndFrame - CurrentStartFrame + 1);
@@ -1286,5 +1316,3 @@ void SInteractButtonsUtils::DoLabelingStep()
 	// 4. 下一帧
 	++CurrentFrame;
 }
-
-

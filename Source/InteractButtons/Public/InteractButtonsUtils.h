@@ -187,13 +187,18 @@ private:
 	FString SourcePath, SavePath;
 	// 当前标注文件夹
 	TArray<FName> CheckedFolders;
+	// 存储所有图片元数据
+	TArray<FImageMetadata> AllImageMetadata;
     // 当前标注步骤
 	int32 CurrentFrame = 0;
 	// 定时器
 	FTimerHandle LabelingTimerHandle;
 	// 开始标注按钮点击事件
 	FReply OnStartLabelingClicked();
+	
+	// 存储 Mesh 的边界数据
+	TMap<FName, FMeshBoundsData> MeshBoundsMap;
 	// 定时器驱动的标注步骤
 	void DoLabelingStep();
-
+	
 };
