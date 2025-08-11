@@ -8,10 +8,12 @@
 class LEVELSEQUENCEUTILS_API FSequenceAlgorithmUtils
 {
 public:
+	// 收集图片元数据
+	static void CollectImageMetadata(const FString& SourceDirectoryPath, TArray<FImageMetadata>& OutImageMetadataArray);
+	
 	void DoLabelingForFrame(
 		const FName& CameraMenuRadioButton,
 		const TArray<FName>& CheckedFolders,
-		TMap<FName, FMeshBoundsData>& MeshBoundsMap,
 		FImageMetadata& ImageMeta,
 		const FString& SavePath);
 private:
@@ -26,9 +28,7 @@ private:
 	
 	// 根据文件路径确定图像格式
 	static EImageFormat GetImageFormat(const FString& FilePath, const TMap<FString, EImageFormat>& FormatMap);
-	
-    // 收集图片元数据
-	static void CollectImageMetadata(const FString& SourceDirectoryPath, TArray<FImageMetadata>& OutImageMetadataArray);
+
 	// 计算像素边界
 	static void CalculateMeshPixelBounds(FImageMetadata& ImageMeta, const TMap<FName, FMeshBoundsData>& MeshBoundsMap);
 	// 保存单张图片坐标到txt

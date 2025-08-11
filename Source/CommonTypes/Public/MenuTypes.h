@@ -5,18 +5,18 @@
 // 菜单项 - 唯一标识和显示名称
 struct FMenuItem
 {
-	FName Name; // 唯一标识（方便反查、传递）
-	FString Label; // 显示名称
+	FName Name;         // 唯一标识（方便反查、传递）
+	FString Label;      // 显示名称：Camera / Folder
+	int32 FolderAlias;  // Folder 别名（数字），用于 txt 存储
 	// 可扩展其他字段...
 
 	// 默认构造函数
 	FMenuItem() = default;
 	// 带参构造函数
-	FMenuItem(const FName& InName, const FString& InLabel)
-		: Name(InName)
-		, Label(InLabel)
-	{
-	}
+	FMenuItem(const FName InName, const FString& InLabel)
+		: Name(InName), Label(InLabel), FolderAlias(-1) {}
+	FMenuItem(const FName InName, const FString& InLabel, const int32 InFolderAlias)
+		: Name(InName), Label(InLabel), FolderAlias(InFolderAlias) {}
 };
 
 // CineCamera
@@ -54,34 +54,36 @@ struct FCineCameraData
 };
 
 // StaticMesh
-struct FStaticMeshData
+struct FMeshBaseData
 {
-	FName Name; 
-	FString Label; 
-	FVector Location;  // StaticMeshActor 世界坐标 cm
+	FName Name;       // 唯一标识
+	FString Label;    // 显示标签
+
+	FMeshBaseData() : Name(TEXT("")), Label(TEXT("")) {}
+	FMeshBaseData(const FName InName, const FString& InLabel) : Name(InName), Label(InLabel) {}
+};
+
+// StaticMesh 原始数据
+struct FStaticMeshData : FMeshBaseData
+{
+	FVector Location;                 // StaticMeshActor 世界坐标 cm
 	FRotator Rotation;
 	FVector Scale;
 	FMatrix WorldMatrix; 
 	TArray<FVector3f> LocalVertices;  // StaticMesh 局域顶点坐标 cm
 
 	FStaticMeshData()
-		: Name(TEXT(""))
-		, Label(TEXT(""))
-		, Location(FVector::ZeroVector)
+		: Location(FVector::ZeroVector)
 		, Rotation(FRotator::ZeroRotator)
 		, Scale(FVector::OneVector)
 		, WorldMatrix(FMatrix::Identity)
 		, LocalVertices(TArray<FVector3f>())
-	{
-	}
+	{}
 };
 
-struct FMeshBoundsData
+struct FMeshBoundsData : FMeshBaseData
 {
-	FName Name;
-	FString Label;
-
-	// 标准化坐标范围
+	// 归一化坐标 cm
 	float NormXMin;
 	float NormXMax;
 	float NormYMin;
@@ -89,42 +91,44 @@ struct FMeshBoundsData
 
 	// 构造函数
 	FMeshBoundsData(const FName InName, const FString& InLabel,
-			 const float InNormXMin, const float InNormXMax,
-			 const float InNormYMin, const float InNormYMax)
-	: Name(InName)
-	, Label(InLabel)
-	, NormXMin(InNormXMin)
-	, NormXMax(InNormXMax)
-	, NormYMin(InNormYMin)
-	, NormYMax(InNormYMax)
+				   const float InNormXMin, const float InNormXMax,
+				   const float InNormYMin, const float InNormYMax)
+		: FMeshBaseData(InName, InLabel)
+		, NormXMin(InNormXMin), NormXMax(InNormXMax)
+		, NormYMin(InNormYMin), NormYMax(InNormYMax)
 	{}
 };
 
 // 像素边界结果
-struct FPixelBoundResult
+struct FPixelBoundResult : FMeshBaseData
 {
-	FName MeshName;
-	FString MeshLabel;
-
+	// 框边界坐标 px
 	float XMinPixel;
 	float XMaxPixel;
 	float YMinPixel;
 	float YMaxPixel;
+
+	FString CategoryLabel;    // Folder 标签：用于框上显示
+	int32 CategoryAlias;      // Folder 别名（数字）：存于 txt
+	float CenterX;            // 框中心 X
+	float CenterY;            // 框中心 Y
+	float BoxWidth;           // 框宽
+	float BoxHeight;          // 框高
 	
 	FPixelBoundResult() = default;
 };
 // 图片元数据
 struct FImageMetadata
 {
-	FString Path;  // 图片完整路径
-		
-	FString Label;  // 图片显示标签，用于UI展示
-	int32 Width;  // 像素 x
-	int32 Height;  // 像素 y
+	FString Name;                                // 图片完整路径
+	FString Label;                               // 图片显示标签，用于 UI 展示
+	
+	int32 Width;                                 // 图宽 px
+	int32 Height;                                // 图高 px
 	TArray<FPixelBoundResult> PixelBoundsArray;  // 多个像素坐标边界
 
-	FImageMetadata(const FString& InPath, const FString& InLabel, const int32 InWidth, const int32 InHeight)
-		: Path(InPath)
+	FImageMetadata(const FString& InName, const FString& InLabel, const int32 InWidth, const int32 InHeight)
+		: Name(InName)
 		, Label(InLabel)
 		, Width(InWidth)
 		, Height(InHeight)

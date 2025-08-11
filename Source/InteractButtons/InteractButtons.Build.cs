@@ -55,8 +55,8 @@ public class InteractButtons : ModuleRules
 				"CinematicCamera",
 				"CommonTypes",
 				"DesktopPlatform",
-				"PropertyEditor",
 				"DesktopWidgets",
+				"EditorWidgets",
 				// ... add private dependencies that you statically link with here ...	
 			]
 		);

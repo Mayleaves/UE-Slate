@@ -9,6 +9,7 @@
 // Unreal Engine 核心模块
 #include "CineCameraActor.h"
 #include "ContentBrowserModule.h"
+#include "DetailColumnSizeData.h"
 #include "Editor.h"
 #include "EditorFontGlyphs.h"
 #include "Editor/Sequencer/Public/ISequencerModule.h"
@@ -26,11 +27,15 @@
 #include "MovieScene.h"
 #include "MyDirectoryData.h"
 #include "MyOutputFormatDetailsCustomization.h"
+#include "Editor/PropertyEditor/Private/IDetailsViewPrivate.h"
 #include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Notifications/SNotificationList.h"
 #include "Widgets/Notifications/SProgressBar.h"
 #include "Widgets/Text/STextBlock.h"
+#include "Windows/AllowWindowsPlatformTypes.h"
+#include <Windows.h>
+#include "Windows/HideWindowsPlatformTypes.h"
 
 #define LOCTEXT_NAMESPACE "InteractButtonsUtils"
 
@@ -631,9 +636,7 @@ bool SInteractButtonsUtils::IsPlayRangeButtonEnabled() const
 	// 检查当前 Job 是否是 DefaultJob
 	if (SequenceJobQueue.IsValid() && SequenceJobQueue->GetJobs().Num() > 0)
 	{
-		TWeakObjectPtr<UMoviePipelineExecutorJob> CurrentJob = SequenceJobQueue->GetJobs()[0]; // 检查第一个 Job
-
-		if (CurrentJob.IsValid() && DefaultJob)
+		if (TWeakObjectPtr CurrentJob = SequenceJobQueue->GetJobs()[0]; CurrentJob.IsValid() && DefaultJob)
 		{
 			// 判断是否引用同一个 Level Sequence
 			const bool isSameSequence = CurrentJob->Sequence == DefaultJob->Sequence;
@@ -709,7 +712,7 @@ bool SInteractButtonsUtils::OnPlayRangeTick(float DeltaTime)
 	return bIsPlayingRange;
 }
 
-void SInteractButtonsUtils::UpdatePlayRange(int32 NewStartFrame, int32 NewEndFrame)
+void SInteractButtonsUtils::UpdatePlayRange(const int32 NewStartFrame, const int32 NewEndFrame)
 {
 	// 更新起始帧和结束帧
 	CurrentStartFrame = NewStartFrame;
@@ -732,25 +735,294 @@ void SInteractButtonsUtils::UpdatePlayRange(int32 NewStartFrame, int32 NewEndFra
 TSharedRef<SWidget> SInteractButtonsUtils::CreateFramePlayRangeButton()
 {
 	return SNew(SButton)
-	                    .Content()
-	                    [
-		                    SNew(STextBlock)
-		                                    .Justification(ETextJustify::Center) // 显式居中
-		                                    .Text(this, &SInteractButtonsUtils::GetPlayRangeButtonText) // 动态文本
-	                    ]
-	                    .IsEnabled(this, &SInteractButtonsUtils::IsPlayRangeButtonEnabled)
-	                    .ToolTipText(this, &SInteractButtonsUtils::GetPlayRangeButtonToolTip)
-	                    .ButtonColorAndOpacity_Lambda([this]()
-	                    {
-		                    return bIsPlayingRange ? FLinearColor::Red : FLinearColor::Green; // 暂停红，播放绿
-	                    })
-	                    .ButtonStyle(FAppStyle::Get(),
-	                                 bIsPlayingRange ? "FlatButton.Danger" : "FlatButton.Success") // 动态按钮样式（可选，增强视觉效果）
-	                    .OnClicked_Lambda([this]()
-	                    {
-		                    bIsPlayingRange ? StopPlayRange() : StartPlayRange();
-		                    return FReply::Handled();
-	                    });
+        .Content()
+        [
+            SNew(STextBlock)
+                .Justification(ETextJustify::Center) // 显式居中
+                .Text(this, &SInteractButtonsUtils::GetPlayRangeButtonText) // 动态文本
+        ]
+        .IsEnabled(this, &SInteractButtonsUtils::IsPlayRangeButtonEnabled)
+        .ToolTipText(this, &SInteractButtonsUtils::GetPlayRangeButtonToolTip)
+        .ButtonColorAndOpacity_Lambda([this]()
+        {
+            return bIsPlayingRange ? FLinearColor::Red : FLinearColor::Green; // 暂停红，播放绿
+        })
+        .ButtonStyle(FAppStyle::Get(),
+                     bIsPlayingRange ? "FlatButton.Danger" : "FlatButton.Success") // 动态按钮样式（可选，增强视觉效果）
+        .OnClicked_Lambda([this]()
+        {
+            bIsPlayingRange ? StopPlayRange() : StartPlayRange();
+            return FReply::Handled();
+        });
+}
+
+bool SInteractButtonsUtils::ValidateAllAliasEntries()
+{
+	bool bHasError = false;
+	for (const auto& [TextBox, ErrorText, Item] : AliasEntries)
+	{
+		if (!TextBox.IsValid() || !ErrorText.IsValid() || !Item)
+			continue;
+
+		const FString InputStr = TextBox.Pin()->GetText().ToString();
+
+		// 判空
+		if (InputStr.IsEmpty())
+		{
+			ErrorText.Pin()->SetText(FText::FromString(TEXT("Cannot be empty")));
+			bHasError = true;
+			continue;
+		}
+		// 全部字符是否为数字
+		bool bAllDigit = true;
+		for (const TCHAR Ch : InputStr)
+		{
+			if (!FChar::IsDigit(Ch))
+			{
+				bAllDigit = false;
+				break;
+			}
+		}
+		// 解析为整数
+		const int32 ParsedAlias = FCString::Atoi(*InputStr);
+		if (!bAllDigit || ParsedAlias < 0)
+		{
+			ErrorText.Pin()->SetText(FText::FromString(TEXT("Enter non-neg int")));
+			bHasError = true;
+			continue;
+		}
+		// 校验通过，清除错误
+		ErrorText.Pin()->SetText(FText::GetEmpty());
+		Item->FolderAlias = ParsedAlias;
+	}
+	return !bHasError;
+}
+
+TSharedRef<SHorizontalBox> SInteractButtonsUtils::CreateFolderItemRow(FMenuItem& Item)
+{
+    TSharedPtr<SEditableTextBox> AliasTextBox;
+    TSharedPtr<STextBlock> ErrorText;
+    const int32 OriginalAlias = Item.FolderAlias;
+
+    auto RowWidget =
+        SNew(SHorizontalBox)
+        // 第一列
+        + SHorizontalBox::Slot()
+        .FillWidth(0.4f)
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .VAlign(VAlign_Center)
+            .Padding(30, 4, 4, 4)
+            [
+                SNew(SImage)
+                .Image(FAppStyle::GetBrush("ContentBrowser.AssetTreeFolderClosed"))
+                .ColorAndOpacity(FSlateColor::UseForeground())
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .Padding(4)
+            [
+                SNew(STextBlock)
+                .Text(FText::FromString(Item.Label))
+                .Margin(FMargin(2, 4))
+            ]
+        ]
+        // 第二列
+        + SHorizontalBox::Slot()
+        .FillWidth(0.6f)
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .VAlign(VAlign_Center)
+            .Padding(15,4,4,4)
+            [
+                SNew(STextBlock)
+                .Text(FText::FromString(TEXT("Index [")))
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .VAlign(VAlign_Center)
+            .Padding(4)
+            [
+            	SAssignNew(AliasTextBox, SEditableTextBox)
+				.MinDesiredWidth(40)
+				.Text(FText::AsNumber(OriginalAlias))
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .VAlign(VAlign_Center)
+            .Padding(4)
+            [
+                SNew(STextBlock)
+                .Text(FText::FromString(TEXT("]")))
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .VAlign(VAlign_Center)
+            .Padding(8, 4, 2, 4)
+            [
+                SAssignNew(ErrorText, STextBlock)
+                .Text(FText::GetEmpty())
+                .ColorAndOpacity(FLinearColor::Red)
+            ]
+        ];
+
+    AliasEntries.Add(FAliasEntry{AliasTextBox, ErrorText, &Item});
+	return RowWidget;
+}
+
+TSharedRef<SVerticalBox> SInteractButtonsUtils::CreateBodyContent()
+{
+	AliasEntries.Empty(); // 清空，防止旧引用
+	TSharedRef<SVerticalBox> ContentBox = SNew(SVerticalBox);
+	for (FMenuItem& Item : FolderMenuItems)
+	{
+		ContentBox->AddSlot()
+		.AutoHeight()
+		[
+			CreateFolderItemRow(Item)
+		];
+	}
+	return ContentBox;
+}
+
+TSharedRef<SHorizontalBox> SInteractButtonsUtils::CreateHeaderContent()
+{
+	// “Folder Name / Label”表头，带折叠箭头
+    return SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .FillWidth(0.4f)
+        .Padding(5,5)
+        [
+            SNew(STextBlock)
+            .Text(FText::FromString(TEXT("Folder Name")))
+            .Font(FAppStyle::GetFontStyle("BoldFont"))
+        ]
+        + SHorizontalBox::Slot()
+        .FillWidth(0.6f)
+        .Padding(0,5)
+        [
+            SNew(STextBlock)
+            .Text(FText::FromString(TEXT("Label")))
+            .Font(FAppStyle::GetFontStyle("BoldFont"))
+        ];
+}
+
+TSharedRef<SVerticalBox> SInteractButtonsUtils::CreateMainBox()
+{
+    return SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SExpandableArea)
+	        // 表头
+            .HeaderContent()
+            [
+                CreateHeaderContent()
+            ]
+	        // 条目
+            .BodyContent()
+            [
+                CreateBodyContent()
+            ]
+            .InitiallyCollapsed(false)
+        ]
+    	// 确定按钮
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(10.0f)
+		.HAlign(HAlign_Right)
+		[
+			SNew(SButton)
+			.Text(FText::FromString(TEXT("OK")))
+			.OnClicked_Lambda([this]()
+			{
+				if (ValidateAllAliasEntries())
+				{
+					if (LabelManagerWindowInstance.IsValid())
+					{
+						LabelManagerWindowInstance->RequestDestroyWindow();
+					}
+				}
+				return FReply::Handled();
+			})
+		];
+}
+
+TSharedRef<SWindow> SInteractButtonsUtils::CreateLabelManagerWindow()
+{
+	// 弹窗
+	TSharedRef<SWindow> Window = SNew(SWindow)
+	.Title(FText::FromString(TEXT("Label Management")))
+	.ClientSize(FVector2D(500, 370))
+	.SupportsMinimize(true)
+	.SupportsMaximize(true)  // 最大化窗口
+	.FocusWhenFirstShown(true)
+	[
+		SNew(SBox)
+		.Padding(2)
+		[
+			CreateMainBox()
+		]
+	];
+
+	Window->SetOnWindowClosed(FOnWindowClosed::CreateLambda([this](const TSharedRef<SWindow>&)
+	{
+		LabelManagerWindowInstance.Reset();
+	}));
+
+	return Window;
+}
+
+void SInteractButtonsUtils::OpenLabelManagerWindow()
+{
+	const TSharedPtr<SWindow> ParentWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
+
+	if (!LabelManagerWindowInstance.IsValid())
+	{
+		LabelManagerWindowInstance = CreateLabelManagerWindow();
+
+		// 父窗口关闭时，子窗口主动关闭
+		if (ParentWindow.IsValid())
+		{
+			ParentWindow->SetOnWindowClosed(FOnWindowClosed::CreateLambda([this](const TSharedRef<SWindow>&)
+			{
+				if (LabelManagerWindowInstance.IsValid())
+				{
+					LabelManagerWindowInstance->RequestDestroyWindow();
+				}
+			}));
+		}
+		FSlateApplication::Get().AddWindow(LabelManagerWindowInstance.ToSharedRef());
+	}
+	else
+	{
+		LabelManagerWindowInstance->BringToFront();
+	}
+
+	// 处理置顶、激活
+	const TSharedRef<SWindow> WindowRef = LabelManagerWindowInstance.ToSharedRef();
+
+// 只在 Windows 平台下编译和执行其中的代码。
+#if PLATFORM_WINDOWS
+	void* OSHandle = WindowRef->GetNativeWindow()->GetOSWindowHandle();
+
+	if (const HWND Hwnd = static_cast<HWND>(OSHandle))
+	{
+		// 若最小化，恢复窗口
+		if (::IsIconic(Hwnd))
+		{
+			::ShowWindow(Hwnd, SW_RESTORE);
+		}
+
+		// 激活 + 提到最前
+		::SetForegroundWindow(Hwnd);
+		::SetActiveWindow(Hwnd);
+	}
+#endif
 }
 
 TSharedRef<SWidget> SInteractButtonsUtils::CreateMenuEntryWidget(
@@ -1038,6 +1310,16 @@ void SInteractButtonsUtils::GetLevelAllMenuItems(const EToolbarType MenuType, TM
 		return A.Label < B.Label;
 	});
 
+	// 初始化 Folder 别名
+	if (MenuType == EToolbarType::Label)
+	{
+		for (int32 i = 0; i < TempMenuItems.Num(); ++i)
+		{
+			// 通过索引 i 为 FolderAlias 赋值（0, 1, 2, ..., N-1）
+			TempMenuItems[i].FolderAlias = i;
+		}
+	}
+
 	// 依次加入 Map
 	for (const FMenuItem& Item : TempMenuItems)
 	{
@@ -1106,7 +1388,7 @@ TSharedRef<SWidget> SInteractButtonsUtils::BuildToolbar(EToolbarType ToolbarType
 		ToolbarIcon = FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.pyramid");
 		for (const auto& Pair : FolderMenuItemMap)
 		{
-			FolderMenuItems.Add(FMenuItem(Pair.Value.Name, Pair.Value.Label));
+			FolderMenuItems.Add(FMenuItem(Pair.Value.Name, Pair.Value.Label, Pair.Value.FolderAlias));
 			FolderMenuCheckBox.Add(Pair.Key, ECheckBoxState::Unchecked);
 		}
 		MenuItems = &FolderMenuItems;
@@ -1142,6 +1424,23 @@ TSharedRef<SWidget> SInteractButtonsUtils::BuildToolbar(EToolbarType ToolbarType
 		ToolbarIcon,
 		true
 	);
+
+	// 如果是 Folder，添加别名管理
+	if (ToolbarType == EToolbarType::Label)
+	{
+		FUIAction ManageAliasAction;
+		ManageAliasAction.ExecuteAction = FExecuteAction::CreateSP(this, &SInteractButtonsUtils::OpenLabelManagerWindow);
+		FSlateIcon GearIcon(FAppStyle::GetAppStyleSetName(), "Icons.Settings");
+
+		Toolbar.AddToolBarButton(
+			ManageAliasAction,
+			NAME_None,
+			FText::GetEmpty(),
+			FText::GetEmpty(),
+			GearIcon,
+			EUserInterfaceActionType::Button
+		);
+	}
 	
 	return Toolbar.MakeWidget();
 }
@@ -1305,7 +1604,6 @@ void SInteractButtonsUtils::DoLabelingStep()
 	AlgorithmUtils.DoLabelingForFrame(
 		CameraMenuRadioButton,
 		CheckedFolders,
-		MeshBoundsMap,
 		ImageMeta,
 		SavePath
 	);

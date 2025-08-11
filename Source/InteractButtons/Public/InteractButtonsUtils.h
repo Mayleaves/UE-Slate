@@ -119,7 +119,34 @@ private:
 	// 帧播放按钮
 	TSharedRef<SWidget> CreateFramePlayRangeButton();
 
+	// 校验非法字符
+	bool ValidateAllAliasEntries();
 
+	// 创建行
+	TSharedRef<SHorizontalBox> CreateFolderItemRow(FMenuItem& Item);
+	struct FAliasEntry
+	{
+		TWeakPtr<SEditableTextBox> TextBox;  // 别名输入框
+		TWeakPtr<STextBlock> ErrorText;      // 错误提示文本
+		FMenuItem* Item;                     // 关联的菜单项
+	};
+	TArray<FAliasEntry> AliasEntries;
+	// 创建表格内容
+	TSharedRef<SVerticalBox> CreateBodyContent();
+
+	// 创建表头
+	static TSharedRef<SHorizontalBox> CreateHeaderContent();
+
+	// 内容
+	TSharedRef<SVerticalBox> CreateMainBox();
+	// 弹窗+内容
+	TSharedRef<SWindow> CreateLabelManagerWindow();
+
+	// 标签管理窗口实例（单例）
+	TSharedPtr<SWindow> LabelManagerWindowInstance;
+	// 打开标签管理窗口
+	void OpenLabelManagerWindow();
+	
 	// 切换按钮标签
 	enum class EToolbarType
 	{
@@ -128,7 +155,7 @@ private:
 	};
 	// 切换按钮是否为激活状态
 	bool bIsCameraToggled = false, bIsLabelToggled = false;
-	// 映射：唯一标识 - 菜单项
+	// 映射：唯一标识 - 菜单项（仅作初始化）
 	TMap<FName, FMenuItem> CameraMenuItemMap, FolderMenuItemMap;
 	// 用于显示菜单项（同时包含唯一标识）
 	TArray<FMenuItem> CameraMenuItems, FolderMenuItems;
@@ -185,7 +212,7 @@ private:
 	TSharedRef<SWidget> CreateStartLabelingButton();
 	// 源路径、保存路径
 	FString SourcePath, SavePath;
-	// 当前标注文件夹
+	// 当前标注文件夹（仅被勾选的文件夹）
 	TArray<FName> CheckedFolders;
 	// 存储所有图片元数据
 	TArray<FImageMetadata> AllImageMetadata;
@@ -196,8 +223,6 @@ private:
 	// 开始标注按钮点击事件
 	FReply OnStartLabelingClicked();
 	
-	// 存储 Mesh 的边界数据
-	TMap<FName, FMeshBoundsData> MeshBoundsMap;
 	// 定时器驱动的标注步骤
 	void DoLabelingStep();
 	

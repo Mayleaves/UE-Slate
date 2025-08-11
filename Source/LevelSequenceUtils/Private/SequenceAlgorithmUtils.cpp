@@ -169,7 +169,7 @@ void FSequenceAlgorithmUtils::CollectCheckedStaticMeshData(const TArray<FName>& 
 
 void FSequenceAlgorithmUtils::ProjectMeshVerticesToCameraPlane(const FCineCameraData& CameraData, const TArray<FStaticMeshData>& MeshArray, TMap<FName, FMeshBoundsData>& MeshBoundsMap) const
 {
-    // 清空旧的MeshBoundsMap，确保每帧只存当前帧数据
+    // 清空旧的 MeshBoundsMap，确保每帧只存当前帧数据
     MeshBoundsMap.Empty();
 
     for (const FStaticMeshData& MeshData : MeshArray)
@@ -232,13 +232,13 @@ void FSequenceAlgorithmUtils::ProjectMeshVerticesToCameraPlane(const FCineCamera
             continue; // 舍弃本 mesh
         }
 
-        // Step 2: 修正边界到[0, 1]范围
+        // Step 2: 修正边界到 [0, 1] 范围
         const float ClampedNormXMin = FMath::Clamp(LocalNormXMin, 0.f, 1.f);
         const float ClampedNormXMax = FMath::Clamp(LocalNormXMax, 0.f, 1.f);
         const float ClampedNormYMin = FMath::Clamp(LocalNormYMin, 0.f, 1.f);
         const float ClampedNormYMax = FMath::Clamp(LocalNormYMax, 0.f, 1.f);
 
-        // Step 3: 存入MeshBoundsMap
+        // Step 3: 存入 MeshBoundsMap
         MeshBoundsMap.Add(
             MeshData.Name,
             FMeshBoundsData(
@@ -326,8 +326,8 @@ void FSequenceAlgorithmUtils::CalculateMeshPixelBounds(FImageMetadata& ImageMeta
         if (XRange >= XThreshold && YRange >= YThreshold)
         {
             FPixelBoundResult PixelBound;
-            PixelBound.MeshName = MeshPair.Key;
-            PixelBound.MeshLabel = MeshData.Label;
+            PixelBound.Name = MeshPair.Key;
+            PixelBound.Label = MeshData.Label;
             PixelBound.XMinPixel = MeshData.NormXMin * ImageMeta.Width;
             PixelBound.XMaxPixel = MeshData.NormXMax * ImageMeta.Width;
             PixelBound.YMinPixel = MeshData.NormYMin * ImageMeta.Height;
@@ -353,7 +353,7 @@ void FSequenceAlgorithmUtils::SavePixelBoundsToTxt(const FString& SaveDirectoryP
     {
         // 写入文本行：MeshLabel, XMinPixel, XMaxPixel, YMinPixel, YMaxPixel
         FString Line = FString::Printf(TEXT("%s, %.2f, %.2f, %.2f, %.2f"),
-            *PixelBound.MeshLabel, PixelBound.XMinPixel, PixelBound.XMaxPixel, PixelBound.YMinPixel, PixelBound.YMaxPixel);
+            *PixelBound.Label, PixelBound.XMinPixel, PixelBound.XMaxPixel, PixelBound.YMinPixel, PixelBound.YMaxPixel);
         OutputLines.Add(Line);
     }
 
@@ -365,7 +365,7 @@ void FSequenceAlgorithmUtils::SavePixelBoundsToTxt(const FString& SaveDirectoryP
 void FSequenceAlgorithmUtils::SavePixelBoundsImage(const FString& SaveDirectoryPath, const FImageMetadata& ImageMeta)
 {
     // 构造保存目录路径
-    const FString ImagePath = ImageMeta.Path;
+    const FString ImagePath = ImageMeta.Name;
     const FString ImageName = ImageMeta.Label;
     const FString BoxedImagePath = FPaths::Combine(SaveDirectoryPath, ImageName + TEXT("_boxed.png"));
 
@@ -398,12 +398,14 @@ void FSequenceAlgorithmUtils::SavePixelBoundsImage(const FString& SaveDirectoryP
 void FSequenceAlgorithmUtils::DoLabelingForFrame(
     const FName& CameraMenuRadioButton,
     const TArray<FName>& CheckedFolders,
-    TMap<FName, FMeshBoundsData>& MeshBoundsMap,
     FImageMetadata& ImageMeta,
     const FString& SavePath)
 {
     FCineCameraData CameraData;
     TArray<FStaticMeshData> MeshArray;
+    
+	// 存储 Mesh 的边界数据
+	TMap<FName, FMeshBoundsData> MeshBoundsMap;
 
     CollectCheckedCineCameraData(CameraMenuRadioButton, CameraData);
     CollectCheckedStaticMeshData(CheckedFolders, MeshArray);
