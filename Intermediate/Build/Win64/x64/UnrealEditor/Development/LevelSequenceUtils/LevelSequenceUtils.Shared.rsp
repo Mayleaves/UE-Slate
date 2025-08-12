@@ -287,8 +287,8 @@
 /I "Runtime/CinematicCamera/Public"
 /I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Source"
 /I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Source/CommonTypes/Public"
-/I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Source/OpenCVForUnreal/Public"
 /I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Source/LevelSequenceUtils/Public"
+/I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Source/OpenCVForUnreal/Public"
 /I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Intermediate/Build/Win64/x64/CISAI_SD_FactoryEditor/Development/UnrealEd"
 /external:W0
 /external:I "ThirdParty/GuidelinesSupportLibrary/GSL-1144/include"

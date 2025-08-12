@@ -334,6 +334,7 @@
 /I "Editor/StaticMeshEditor/Public"
 /I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Source"
 /I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Source/CommonTypes/Public"
+/I "Developer/DesktopWidgets/Public"
 /I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Intermediate/Build/Win64/UnrealEditor/Inc/InteractButtons/UHT"
 /I "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Source/InteractButtons/Public"
 /I "../Plugins/MovieScene/LevelSequenceEditor/Intermediate/Build/Win64/UnrealEditor/Inc/LevelSequenceEditor/UHT"

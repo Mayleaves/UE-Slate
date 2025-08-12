@@ -25,6 +25,7 @@ public class LevelSequenceUtils : ModuleRules
 				"Core",
 				"MeshDescription",
 				"StaticMeshDescription",
+				"OpenCVForUnreal",
 				// ... add other public dependencies that you statically link with here ...
 			]
 		);
@@ -40,7 +41,6 @@ public class LevelSequenceUtils : ModuleRules
 				"UnrealEd",
 				"CinematicCamera",
 				"ImageWrapper",
-				"OpenCVForUnreal",
 				// ... add private dependencies that you statically link with here ...	
 			]
 		);

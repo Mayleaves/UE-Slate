@@ -124,12 +124,14 @@ private:
 
 	// 创建行
 	TSharedRef<SHorizontalBox> CreateFolderItemRow(FMenuItem& Item);
+
 	struct FAliasEntry
 	{
-		TWeakPtr<SEditableTextBox> TextBox;  // 别名输入框
-		TWeakPtr<STextBlock> ErrorText;      // 错误提示文本
-		FMenuItem* Item;                     // 关联的菜单项
+		TWeakPtr<SEditableTextBox> TextBox; // 别名输入框
+		TWeakPtr<STextBlock> ErrorText; // 错误提示文本
+		FMenuItem* Item; // 关联的菜单项
 	};
+
 	TArray<FAliasEntry> AliasEntries;
 	// 创建表格内容
 	TSharedRef<SVerticalBox> CreateBodyContent();
@@ -146,13 +148,14 @@ private:
 	TSharedPtr<SWindow> LabelManagerWindowInstance;
 	// 打开标签管理窗口
 	void OpenLabelManagerWindow();
-	
+
 	// 切换按钮标签
 	enum class EToolbarType
 	{
 		Camera,
 		Label
 	};
+
 	// 切换按钮是否为激活状态
 	bool bIsCameraToggled = false, bIsLabelToggled = false;
 	// 映射：唯一标识 - 菜单项（仅作初始化）
@@ -172,14 +175,14 @@ private:
 		FName& Name,
 		const FString& Label,
 		const FString& FilterString,
-		FName* CameraSelectedKey,   
+		FName* CameraSelectedKey,
 		TMap<FName, ECheckBoxState>* FolderCheckStates
 	);
-	
+
 	// 更新菜单项区域
 	void UpdateMenuEntries(
-		TArray<FMenuItem>* MenuItems,         
-		FName* CameraSelectedKey,                     
+		TArray<FMenuItem>* MenuItems,
+		FName* CameraSelectedKey,
 		TMap<FName, ECheckBoxState>* FolderCheckStates,
 		const FText& FilterText,
 		const TSharedPtr<SVerticalBox>& MenuEntriesBox
@@ -192,7 +195,7 @@ private:
 	// 构造下拉按钮：搜索框 + 菜单项
 	TSharedRef<SWidget> GenerateDropdownMenu(
 		TArray<FMenuItem>* MenuItems,
-		FName* CameraSelectedKey,                  
+		FName* CameraSelectedKey,
 		TMap<FName, ECheckBoxState>* FolderCheckStates
 	);
 
@@ -213,17 +216,16 @@ private:
 	// 源路径、保存路径
 	FString SourcePath, SavePath;
 	// 当前标注文件夹（仅被勾选的文件夹）
-	TArray<FName> CheckedFolders;
+	TArray<FMenuItem> CheckedFolders;
 	// 存储所有图片元数据
 	TArray<FImageMetadata> AllImageMetadata;
-    // 当前标注步骤
+	// 当前标注步骤
 	int32 CurrentFrame = 0;
 	// 定时器
 	FTimerHandle LabelingTimerHandle;
 	// 开始标注按钮点击事件
 	FReply OnStartLabelingClicked();
-	
+
 	// 定时器驱动的标注步骤
 	void DoLabelingStep();
-	
 };
