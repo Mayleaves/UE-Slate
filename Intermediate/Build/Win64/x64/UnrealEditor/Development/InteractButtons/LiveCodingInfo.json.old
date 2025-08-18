@@ -8,6 +8,7 @@
 			"InteractButtons.cpp.obj",
 			"InteractButtonsUtils.cpp.obj",
 			"MyDirectoryData.cpp.obj",
+			"MyOutputFormatDetailsCustomization.cpp.obj",
 			"MyPositiveActionButton.cpp.obj"
 		]
 	}

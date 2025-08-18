@@ -245,6 +245,8 @@
             "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\commontypes\\public\\menutypes.h",
             "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\interactbuttons\\private\\mydirectorydata.h",
             "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\intermediate\\build\\win64\\unrealeditor\\inc\\interactbuttons\\uht\\mydirectorydata.generated.h",
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\interactbuttons\\private\\labelingoptionsdata.h",
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\intermediate\\build\\win64\\unrealeditor\\inc\\interactbuttons\\uht\\labelingoptionsdata.generated.h",
             "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\interactbuttons\\private\\myjobcustomization.h",
             "d:\\program\\epic games\\ue_5.6\\engine\\source\\editor\\propertyeditor\\public\\detailcategorybuilder.h",
             "d:\\program\\epic games\\ue_5.6\\engine\\source\\editor\\propertyeditor\\public\\idetailcustomnodebuilder.h",
@@ -508,7 +510,8 @@
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.22621.0\\shared\\stralign.h",
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.22621.0\\um\\imm.h",
             "c:\\program files (x86)\\windows kits\\10\\include\\10.0.22621.0\\um\\ime_cmodes.h",
-            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\core\\public\\windows\\postwindowsapi.h"
+            "d:\\program\\epic games\\ue_5.6\\engine\\source\\runtime\\core\\public\\windows\\postwindowsapi.h",
+            "d:\\developmenttools\\unreal projects\\cisai_sd_factory\\plugins\\syntheticdatafactory\\source\\interactbuttons\\private\\labelingoptionsdetailscustomization.h"
         ],
         "ImportedModules": [],
         "ImportedHeaderUnits": []

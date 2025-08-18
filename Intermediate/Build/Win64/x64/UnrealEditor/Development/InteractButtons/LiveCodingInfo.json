@@ -3,10 +3,13 @@
 	{
 		"Module.InteractButtons.cpp.obj": [
 			"InteractButtons.init.gen.cpp.obj",
+			"LabelingOptionsData.gen.cpp.obj",
 			"MyDirectoryData.gen.cpp.obj",
 			"PerModuleInline.gen.cpp.obj",
 			"InteractButtons.cpp.obj",
 			"InteractButtonsUtils.cpp.obj",
+			"LabelingOptionsData.cpp.obj",
+			"LabelingOptionsDetailsCustomization.cpp.obj",
 			"MyDirectoryData.cpp.obj",
 			"MyOutputFormatDetailsCustomization.cpp.obj",
 			"MyPositiveActionButton.cpp.obj"

@@ -34,6 +34,9 @@
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include <Windows.h>
 
+#include "LabelingOptionsData.h"
+#include "LabelingOptionsDetailsCustomization.h"
+
 #define LOCTEXT_NAMESPACE "InteractButtonsUtils"
 
 void SInteractButtonsUtils::Construct(const FArguments& InArgs)
@@ -46,6 +49,7 @@ void SInteractButtonsUtils::Construct(const FArguments& InArgs)
 	CurrentSequencer = InArgs._CurrentSequencer;
 
 	InitializeJobDetailsPanel();
+	InitializeLabelingOptions();
 	InitializeFileDirectory();
 
 	ChildSlot
@@ -84,12 +88,19 @@ void SInteractButtonsUtils::Construct(const FArguments& InArgs)
 		[
 			JobDetailsPanelWidget.ToSharedRef() // Job Info
 		]
-
+		
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(10, 0, 10, 0)
+		[
+			LabelingOptionsWidget.ToSharedRef() // Labeling Options
+		]
+		
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.Padding(10, 0, 10, 5)
 		[
-			FileDirectoryWidget.ToSharedRef() // Source Directory
+			FileDirectoryWidget.ToSharedRef() // File Directory
 		]
 
 		+ SVerticalBox::Slot()
@@ -149,18 +160,21 @@ void SInteractButtonsUtils::Construct(const FArguments& InArgs)
 	];
 }
 
-void SInteractButtonsUtils::InitializeJobDetailsPanel()
+TSharedPtr<IDetailsView> SInteractButtonsUtils::CreateDirectoryDetailsView()
 {
-	// 1. 创建细节视图（Detail Panel）
-	FPropertyEditorModule& PropertyEditorModule = FModuleManager::Get().LoadModuleChecked<FPropertyEditorModule>(
-		"PropertyEditor");
+	FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 	FDetailsViewArgs DetailsViewArgs;
 	DetailsViewArgs.bAllowSearch = false;
 	DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
 	DetailsViewArgs.bHideSelectionTip = true;
 	DetailsViewArgs.ColumnWidth = 0.7f;
+	return PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+}
 
-	JobDetailsPanelWidget = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+void SInteractButtonsUtils::InitializeJobDetailsPanel()
+{
+	// 1. 创建细节视图（Detail Panel）
+	JobDetailsPanelWidget = CreateDirectoryDetailsView();
 
 	// 2. 注册细节定制类
 	JobDetailsPanelWidget->RegisterInstancedCustomPropertyLayout(
@@ -198,17 +212,22 @@ void SInteractButtonsUtils::InitializeJobDetailsPanel()
 	}
 }
 
+void SInteractButtonsUtils::InitializeLabelingOptions()
+{
+	LabelingOptionsWidget = CreateDirectoryDetailsView();
+	
+	LabelingOptionsWidget->RegisterInstancedCustomPropertyLayout(
+		ULabelingOptionsData::StaticClass(),
+		FOnGetDetailCustomizationInstance::CreateStatic(&FLabelingOptionsDetailsCustomization::MakeInstance)
+	);
+	
+	LabelingSettingObject = NewObject<ULabelingOptionsData>();  // LabelingSettingObject->MaximumDistance
+	LabelingOptionsWidget->SetObject(LabelingSettingObject.Get());
+}
+
 void SInteractButtonsUtils::InitializeFileDirectory()
 {
-	FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(
-		"PropertyEditor");
-	FDetailsViewArgs DetailsViewArgs;
-	DetailsViewArgs.bAllowSearch = false;
-	DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-	DetailsViewArgs.bHideSelectionTip = true;
-	DetailsViewArgs.ColumnWidth = 0.7f;
-
-	FileDirectoryWidget = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+	FileDirectoryWidget = CreateDirectoryDetailsView();
 
 	// 注册自定义属性布局
 	FileDirectoryWidget->RegisterInstancedCustomPropertyLayout(
@@ -224,35 +243,35 @@ void SInteractButtonsUtils::InitializeFileDirectory()
 TSharedRef<SWidget> SInteractButtonsUtils::CreateLevelSequencePromptText()
 {
 	return SNew(STextBlock)
-	                       .Text(NSLOCTEXT("InteractButtons", "LevelSequencePrompt",
-	                                       "Select a Level Sequence")) // 使用本地化文本
-	                       .Font(FCoreStyle::GetDefaultFontStyle("Regular", 10))
-	                       .ColorAndOpacity(FLinearColor::White);
+           .Text(NSLOCTEXT("InteractButtons", "LevelSequencePrompt",
+                           "Select a Level Sequence")) // 使用本地化文本
+           .Font(FCoreStyle::GetDefaultFontStyle("Regular", 10))
+           .ColorAndOpacity(FLinearColor::White);
 }
 
 TSharedRef<SWidget> SInteractButtonsUtils::MakeAddSequenceJobButton()
 {
 	return SNew(SMyPositiveActionButton)
-		.Text(LOCTEXT("AddNewJob_Text", " Select a Scene"))
-		.Icon(FAppStyle::Get().GetBrush("Icons.Plus"))
-		.OnGetMenuContent(this, &SInteractButtonsUtils::OnGenerateNewJobFromAssetMenu);
+			.Text(LOCTEXT("AddNewJob_Text", " Select a Scene"))
+			.Icon(FAppStyle::Get().GetBrush("Icons.Plus"))
+			.OnGetMenuContent(this, &SInteractButtonsUtils::OnGenerateNewJobFromAssetMenu);
 }
 
 TSharedRef<SWidget> SInteractButtonsUtils::RemoveLatestJobButton()
 {
 	return SNew(SButton)
-	                    .Content()
-	                    [
-		                    SNew(STextBlock)
-		                                    .Justification(ETextJustify::Center) // 显式居中
-		                                    .TextStyle(FAppStyle::Get(), "NormalText.Important")
-		                                    .Font(FAppStyle::Get().GetFontStyle("FontAwesome.10"))
-		                                    .Text(FEditorFontGlyphs::Minus)
-	                    ]
-	                    .ContentPadding(FMargin(4.f)) // 等同于 MoviePipeline::ButtonPadding
-	                    .IsEnabled(this, &SInteractButtonsUtils::IsJobValid)
-	                    .OnClicked(this, &SInteractButtonsUtils::DeleteLatest)
-	                    .VAlign(VAlign_Center);
+            .Content()
+            [
+                SNew(STextBlock)
+                .Justification(ETextJustify::Center) // 显式居中
+                .TextStyle(FAppStyle::Get(), "NormalText.Important")
+                .Font(FAppStyle::Get().GetFontStyle("FontAwesome.10"))
+                .Text(FEditorFontGlyphs::Minus)
+            ]
+            .ContentPadding(FMargin(4.f)) // 等同于 MoviePipeline::ButtonPadding
+            .IsEnabled(this, &SInteractButtonsUtils::IsJobValid)
+            .OnClicked(this, &SInteractButtonsUtils::DeleteLatest)
+            .VAlign(VAlign_Center);
 }
 
 TSharedRef<SWidget> SInteractButtonsUtils::OnGenerateNewJobFromAssetMenu()
@@ -328,7 +347,7 @@ void SInteractButtonsUtils::OnCreateJobFromAsset(const FAssetData& InAsset)
 
 	TArray<UMoviePipelineExecutorJob*> NewJobs;
 
-	if (ULevelSequence* LevelSequence = Cast<ULevelSequence>(InAsset.GetAsset()))
+	if (const ULevelSequence* LevelSequence = Cast<ULevelSequence>(InAsset.GetAsset()))
 	{
 		UMoviePipelineExecutorJob* NewJob = UMoviePipelineEditorBlueprintLibrary::CreateJobFromSequence(
 			ActiveQueue, LevelSequence);
@@ -595,32 +614,32 @@ FText SInteractButtonsUtils::GetJobToolTip() const
 TSharedRef<SWidget> SInteractButtonsUtils::CreateFrameRangeInputPanel()
 {
 	return SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot()
-		.AutoWidth()
-		.Padding(5, 0)
-		.VAlign(VAlign_Center)
-		[
-			SNew(STextBlock).Text(FText::FromString(TEXT("Start Frame")))
-		]
-		+ SHorizontalBox::Slot()
-		.AutoWidth()
-		.Padding(4, 10, 10, 10)
-		[
-			CreateFrameSpinBox(true) // 起始帧
-		]
-		+ SHorizontalBox::Slot()
-		.AutoWidth()
-		.Padding(5, 0)
-		.VAlign(VAlign_Center)
-		[
-			SNew(STextBlock).Text(FText::FromString(TEXT("End Frame")))
-		]
-		+ SHorizontalBox::Slot()
-		.AutoWidth()
-		.Padding(4, 10, 10, 10)
-		[
-			CreateFrameSpinBox(false) // 结束帧
-		];
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.Padding(5, 0)
+			.VAlign(VAlign_Center)
+			[
+				SNew(STextBlock).Text(FText::FromString(TEXT("Start Frame")))
+			]
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.Padding(4, 10, 10, 10)
+			[
+				CreateFrameSpinBox(true) // 起始帧
+			]
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.Padding(5, 0)
+			.VAlign(VAlign_Center)
+			[
+				SNew(STextBlock).Text(FText::FromString(TEXT("End Frame")))
+			]
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.Padding(4, 10, 10, 10)
+			[
+				CreateFrameSpinBox(false) // 结束帧
+			];
 }
 
 TSharedPtr<ISequencer> SInteractButtonsUtils::GetActiveSequencer() const
@@ -732,25 +751,25 @@ void SInteractButtonsUtils::UpdatePlayRange(const int32 NewStartFrame, const int
 TSharedRef<SWidget> SInteractButtonsUtils::CreateFramePlayRangeButton()
 {
 	return SNew(SButton)
-	                    .Content()
-	                    [
-		                    SNew(STextBlock)
-		                                    .Justification(ETextJustify::Center) // 显式居中
-		                                    .Text(this, &SInteractButtonsUtils::GetPlayRangeButtonText) // 动态文本
-	                    ]
-	                    .IsEnabled(this, &SInteractButtonsUtils::IsPlayRangeButtonEnabled)
-	                    .ToolTipText(this, &SInteractButtonsUtils::GetPlayRangeButtonToolTip)
-	                    .ButtonColorAndOpacity_Lambda([this]()
-	                    {
-		                    return bIsPlayingRange ? FLinearColor::Red : FLinearColor::Green; // 暂停红，播放绿
-	                    })
-	                    .ButtonStyle(FAppStyle::Get(),
-	                                 bIsPlayingRange ? "FlatButton.Danger" : "FlatButton.Success") // 动态按钮样式（可选，增强视觉效果）
-	                    .OnClicked_Lambda([this]()
-	                    {
-		                    bIsPlayingRange ? StopPlayRange() : StartPlayRange();
-		                    return FReply::Handled();
-	                    });
+	        .Content()
+	        [
+	            SNew(STextBlock)
+	            .Justification(ETextJustify::Center) // 显式居中
+	            .Text(this, &SInteractButtonsUtils::GetPlayRangeButtonText) // 动态文本
+	        ]
+	        .IsEnabled(this, &SInteractButtonsUtils::IsPlayRangeButtonEnabled)
+	        .ToolTipText(this, &SInteractButtonsUtils::GetPlayRangeButtonToolTip)
+	        .ButtonColorAndOpacity_Lambda([this]()
+	        {
+	            return bIsPlayingRange ? FLinearColor::Red : FLinearColor::Green; // 暂停红，播放绿
+	        })
+	        .ButtonStyle(FAppStyle::Get(),
+	                     bIsPlayingRange ? "FlatButton.Danger" : "FlatButton.Success") // 动态按钮样式（可选，增强视觉效果）
+	        .OnClicked_Lambda([this]()
+	        {
+	            bIsPlayingRange ? StopPlayRange() : StartPlayRange();
+	            return FReply::Handled();
+	        });
 }
 
 bool SInteractButtonsUtils::ValidateAllAliasEntries()
@@ -879,9 +898,9 @@ TSharedRef<SVerticalBox> SInteractButtonsUtils::CreateBodyContent()
 	{
 		ContentBox->AddSlot()
 		          .AutoHeight()
-		[
-			CreateFolderItemRow(Item)
-		];
+		          [
+				  	 CreateFolderItemRow(Item)
+				  ];
 	}
 	return ContentBox;
 }
@@ -953,11 +972,11 @@ TSharedRef<SWindow> SInteractButtonsUtils::CreateLabelManagerWindow()
 {
 	// 弹窗
 	TSharedRef<SWindow> Window = SNew(SWindow)
-	                                          .Title(FText::FromString(TEXT("Label Management")))
-	                                          .ClientSize(FVector2D(500, 370))
-	                                          .SupportsMinimize(true)
-	                                          .SupportsMaximize(true) // 最大化窗口
-	                                          .FocusWhenFirstShown(true)
+		.Title(FText::FromString(TEXT("Label Management")))
+		.ClientSize(FVector2D(500, 370))
+		.SupportsMinimize(true)
+		.SupportsMaximize(true) // 最大化窗口
+		.FocusWhenFirstShown(true)
 		[
 			SNew(SBox)
 			.Padding(2)
@@ -1066,7 +1085,7 @@ TSharedRef<SWidget> SInteractButtonsUtils::CreateMenuEntryWidget(
 
 	// 更新单选框/复选框状态
 	auto ChangeCheckState = [this, Name, Label, CameraSelectedKey, FolderCheckStates, bIsCamera
-		](ECheckBoxState NewState)
+		](const ECheckBoxState NewState)
 	{
 		if (bIsCamera)
 		{
@@ -1484,14 +1503,14 @@ TSharedRef<SWidget> SInteractButtonsUtils::CreateProgressBar()
 TSharedRef<SWidget> SInteractButtonsUtils::CreateStartLabelingButton()
 {
 	return SNew(SButton)
-		.Content()
-		[
-			SNew(STextBlock)
-			.Justification(ETextJustify::Center)
-			.Text(FText::FromString(TEXT("Start Labeling")))
-		]
-		.ButtonStyle(FAppStyle::Get(), "PrimaryButton")
-		.OnClicked(FOnClicked::CreateSP(this, &SInteractButtonsUtils::OnStartLabelingClicked));
+		   .Content()
+		   [
+				SNew(STextBlock)
+				.Justification(ETextJustify::Center)
+				.Text(FText::FromString(TEXT("Start Labeling")))
+		   ]
+		   .ButtonStyle(FAppStyle::Get(), "PrimaryButton")
+		   .OnClicked(FOnClicked::CreateSP(this, &SInteractButtonsUtils::OnStartLabelingClicked));
 }
 
 FReply SInteractButtonsUtils::OnStartLabelingClicked()

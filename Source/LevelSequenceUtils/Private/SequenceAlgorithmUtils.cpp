@@ -128,7 +128,7 @@ void FSequenceAlgorithmUtils::CollectCheckedStaticMeshData(
 				MeshData.Location = SMActor->GetActorLocation(); // StaticMeshActor 世界坐标 cm
 				MeshData.Rotation = SMActor->GetActorRotation();
 				MeshData.Scale = SMActor->GetActorScale3D();
-				MeshData.WorldMatrix = SMActor->GetActorTransform().ToMatrixWithScale(); // todo 4×4变换矩阵
+				MeshData.WorldMatrix = SMActor->GetActorTransform().ToMatrixWithScale(); // 4×4变换矩阵
 				MeshData.LocalVertices.Empty();
 
 				// 获取 StaticMesh 局域顶点坐标
@@ -243,13 +243,10 @@ void FSequenceAlgorithmUtils::ProjectMeshVerticesToCameraPlane(
 				LocalNormXMax = FMath::Max(LocalNormXMax, NormX);
 				LocalNormYMin = FMath::Min(LocalNormYMin, NormY);
 				LocalNormYMax = FMath::Max(LocalNormYMax, NormY);
-
-				// todo 可选：调试画出投影点到图片上
-				// 可将所有 (NormX, NormY) 保存下来用于后续可视化
 			}
 			else
 			{
-				UE_LOG(LogTemp, Log, TEXT("           [被剔除：X <= 0]"));
+				UE_LOG(LogTemp, Warning, TEXT("           [被剔除：X <= 0]"));
 			}
 		}
 
@@ -278,6 +275,7 @@ void FSequenceAlgorithmUtils::ProjectMeshVerticesToCameraPlane(
 				ClampedNormYMax
 			)
 		);
+
 		UE_LOG(LogTemp, Log, TEXT("   边界统计: %s NormXMin=%.3f, NormXMax=%.3f, NormYMin=%.3f, NormYMax=%.3f"),
 		       *MeshData.Label, ClampedNormXMin, ClampedNormXMax, ClampedNormYMin, ClampedNormYMax);
 	}

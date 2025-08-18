@@ -14,9 +14,9 @@ class INTERACTBUTTONS_API UMyDirectoryData : public UObject  // UMySettings
 public:
 	UMyDirectoryData(); // 构造函数声明
 	
-	UPROPERTY(EditAnywhere, Category = "File Directory")
+	UPROPERTY(EditAnywhere, Category = "File Directory", meta = (ToolTip = "The source directory used for input files."))
 	FDirectoryPath SourceDirectory;  // 默认显示名为 "Source Directory"
 	
-	UPROPERTY(EditAnywhere, Category = "File Directory", meta = (DisplayName = "Save Directory"))  // （可选）显示名为 "Save Directory"
+	UPROPERTY(EditAnywhere, Category = "File Directory", meta = (DisplayName = "Save Directory", ToolTip = "The directory where output files will be saved."))  // （可选）显示名为 "Save Directory"
 	FDirectoryPath SaveDirectory;
 };

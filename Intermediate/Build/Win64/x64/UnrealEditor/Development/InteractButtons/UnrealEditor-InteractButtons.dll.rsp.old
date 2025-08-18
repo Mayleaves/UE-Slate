@@ -65,6 +65,7 @@
 "D:/DevelopmentTools/Unreal Projects/CISAI_SD_Factory/Plugins/SyntheticDataFactory/Intermediate/Build/Win64/x64/UnrealEditor/Development/CommonTypes/UnrealEditor-CommonTypes.lib"
 "../Intermediate/Build/Win64/x64/UnrealEditor/Development/DesktopPlatform/UnrealEditor-DesktopPlatform.lib"
 "../Intermediate/Build/Win64/x64/UnrealEditor/Development/DesktopWidgets/UnrealEditor-DesktopWidgets.lib"
+"../Intermediate/Build/Win64/x64/UnrealEditor/Development/EditorWidgets/UnrealEditor-EditorWidgets.lib"
 "../Intermediate/Build/Win64/x64/UnrealEditor/Development/Core/UnrealEditor-Core.lib"
 "../Plugins/MovieScene/LevelSequenceEditor/Intermediate/Build/Win64/x64/UnrealEditor/Development/LevelSequenceEditor/UnrealEditor-LevelSequenceEditor.lib"
 "../Plugins/MovieScene/MovieRenderPipeline/Intermediate/Build/Win64/x64/UnrealEditor/Development/MovieRenderPipelineCore/UnrealEditor-MovieRenderPipelineCore.lib"

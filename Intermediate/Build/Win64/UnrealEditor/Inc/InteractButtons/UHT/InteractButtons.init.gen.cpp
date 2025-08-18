@@ -17,13 +17,13 @@ void EmptyLinkFunctionForGeneratedCodeInteractButtons_init() {}
 				nullptr,
 				0,
 				PKG_CompiledIn | 0x00000040,
-				0x505BD04B,
-				0xC61796E6,
+				0xBEDB6617,
+				0x2C93CC37,
 				METADATA_PARAMS(0, nullptr)
 			};
 			UECodeGen_Private::ConstructUPackage(Z_Registration_Info_UPackage__Script_InteractButtons.OuterSingleton, PackageParams);
 		}
 		return Z_Registration_Info_UPackage__Script_InteractButtons.OuterSingleton;
 	}
-	static FRegisterCompiledInInfo Z_CompiledInDeferPackage_UPackage__Script_InteractButtons(Z_Construct_UPackage__Script_InteractButtons, TEXT("/Script/InteractButtons"), Z_Registration_Info_UPackage__Script_InteractButtons, CONSTRUCT_RELOAD_VERSION_INFO(FPackageReloadVersionInfo, 0x505BD04B, 0xC61796E6));
+	static FRegisterCompiledInInfo Z_CompiledInDeferPackage_UPackage__Script_InteractButtons(Z_Construct_UPackage__Script_InteractButtons, TEXT("/Script/InteractButtons"), Z_Registration_Info_UPackage__Script_InteractButtons, CONSTRUCT_RELOAD_VERSION_INFO(FPackageReloadVersionInfo, 0xBEDB6617, 0x2C93CC37));
 PRAGMA_ENABLE_DEPRECATION_WARNINGS

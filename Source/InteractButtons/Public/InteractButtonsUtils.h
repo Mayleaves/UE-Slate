@@ -9,6 +9,7 @@
 #include "Widgets/Input/SSpinBox.h"
 #include "MenuTypes.h"
 #include "InteractButtons/Private/MyDirectoryData.h"
+#include "InteractButtons/Private/LabelingOptionsData.h"
 
 class INTERACTBUTTONS_API SInteractButtonsUtils final : public SCompoundWidget
 {
@@ -67,15 +68,25 @@ private:
 	// 删除最新项目
 	FReply DeleteLatest();
 
-	// 初始化一个空的任务细节面板
-	void InitializeJobDetailsPanel();
+	// 创建细节视图（Detail Panel）
+	static TSharedPtr<IDetailsView> CreateDirectoryDetailsView();
+	
 	// 任务细节面板控件
 	TSharedPtr<IDetailsView> JobDetailsPanelWidget;
-
-	// 文件目录面板控件
-	TSharedPtr<IDetailsView> FileDirectoryWidget;
+	// 初始化一个空的任务细节面板
+	void InitializeJobDetailsPanel();
+	
+	// 当前标注选项
+	TWeakObjectPtr<ULabelingOptionsData> LabelingSettingObject;
+	// 标注选项面板控件
+	TSharedPtr<IDetailsView> LabelingOptionsWidget;
+	// 初始化标注选项面板
+	void InitializeLabelingOptions();
+	
 	// 当前文件路径
 	TWeakObjectPtr<UMyDirectoryData> FileSettingObject;
+	// 文件目录面板控件
+	TSharedPtr<IDetailsView> FileDirectoryWidget;
 	// 初始化文件目录面板
 	void InitializeFileDirectory();
 

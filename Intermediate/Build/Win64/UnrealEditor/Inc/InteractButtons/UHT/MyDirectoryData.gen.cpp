@@ -67,23 +67,17 @@ struct Z_Construct_UClass_UMyDirectoryData_Statics
 	};
 	static constexpr UECodeGen_Private::FMetaDataPairParam NewProp_SourceDirectory_MetaData[] = {
 		{ "Category", "File Directory" },
-#if !UE_BUILD_SHIPPING
-		{ "Comment", "// \xe6\x9e\x84\xe9\x80\xa0\xe5\x87\xbd\xe6\x95\xb0\xe5\xa3\xb0\xe6\x98\x8e\n" },
-#endif
 		{ "ModuleRelativePath", "Private/MyDirectoryData.h" },
 #if !UE_BUILD_SHIPPING
-		{ "ToolTip", "\xe6\x9e\x84\xe9\x80\xa0\xe5\x87\xbd\xe6\x95\xb0\xe5\xa3\xb0\xe6\x98\x8e" },
+		{ "ToolTip", "The source directory used for input files." },
 #endif
 	};
 	static constexpr UECodeGen_Private::FMetaDataPairParam NewProp_SaveDirectory_MetaData[] = {
 		{ "Category", "File Directory" },
-#if !UE_BUILD_SHIPPING
-		{ "Comment", "// \xe9\xbb\x98\xe8\xae\xa4\xe6\x98\xbe\xe7\xa4\xba\xe5\x90\x8d\xe4\xb8\xba \"Source Directory\"\n// \xef\xbc\x88\xe5\x8f\xaf\xe9\x80\x89\xef\xbc\x89\xe6\x98\xbe\xe7\xa4\xba\xe5\x90\x8d\xe4\xb8\xba \"Save Directory\"\n" },
-#endif
 		{ "DisplayName", "Save Directory" },
 		{ "ModuleRelativePath", "Private/MyDirectoryData.h" },
 #if !UE_BUILD_SHIPPING
-		{ "ToolTip", "\xe9\xbb\x98\xe8\xae\xa4\xe6\x98\xbe\xe7\xa4\xba\xe5\x90\x8d\xe4\xb8\xba \"Source Directory\"\n\xef\xbc\x88\xe5\x8f\xaf\xe9\x80\x89\xef\xbc\x89\xe6\x98\xbe\xe7\xa4\xba\xe5\x90\x8d\xe4\xb8\xba \"Save Directory\"" },
+		{ "ToolTip", "The directory where output files will be saved." },
 #endif
 	};
 #endif // WITH_METADATA
@@ -139,10 +133,10 @@ UMyDirectoryData::~UMyDirectoryData() {}
 struct Z_CompiledInDeferFile_FID_DevelopmentTools_Unreal_Projects_CISAI_SD_Factory_Plugins_SyntheticDataFactory_Source_InteractButtons_Private_MyDirectoryData_h__Script_InteractButtons_Statics
 {
 	static constexpr FClassRegisterCompiledInInfo ClassInfo[] = {
-		{ Z_Construct_UClass_UMyDirectoryData, UMyDirectoryData::StaticClass, TEXT("UMyDirectoryData"), &Z_Registration_Info_UClass_UMyDirectoryData, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(UMyDirectoryData), 2116492460U) },
+		{ Z_Construct_UClass_UMyDirectoryData, UMyDirectoryData::StaticClass, TEXT("UMyDirectoryData"), &Z_Registration_Info_UClass_UMyDirectoryData, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(UMyDirectoryData), 723184230U) },
 	};
 };
-static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_DevelopmentTools_Unreal_Projects_CISAI_SD_Factory_Plugins_SyntheticDataFactory_Source_InteractButtons_Private_MyDirectoryData_h__Script_InteractButtons_489631401(TEXT("/Script/InteractButtons"),
+static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_DevelopmentTools_Unreal_Projects_CISAI_SD_Factory_Plugins_SyntheticDataFactory_Source_InteractButtons_Private_MyDirectoryData_h__Script_InteractButtons_1949283364(TEXT("/Script/InteractButtons"),
 	Z_CompiledInDeferFile_FID_DevelopmentTools_Unreal_Projects_CISAI_SD_Factory_Plugins_SyntheticDataFactory_Source_InteractButtons_Private_MyDirectoryData_h__Script_InteractButtons_Statics::ClassInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_DevelopmentTools_Unreal_Projects_CISAI_SD_Factory_Plugins_SyntheticDataFactory_Source_InteractButtons_Private_MyDirectoryData_h__Script_InteractButtons_Statics::ClassInfo),
 	nullptr, 0,
 	nullptr, 0);
