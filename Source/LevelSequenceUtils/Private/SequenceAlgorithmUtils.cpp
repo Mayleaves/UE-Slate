@@ -66,16 +66,10 @@ void FSequenceAlgorithmUtils::CollectCheckedCineCameraData(const FName& CameraNa
 
 void FSequenceAlgorithmUtils::ExtractCineCameraData(const ACineCameraActor* CameraActor, FCineCameraData& OutCameraData)
 {
-	if (!CameraActor || CameraActor->IsPendingKillPending())
-	{
-		return;
-	}
+	if (!CameraActor || CameraActor->IsPendingKillPending()) return;
 
 	const UCineCameraComponent* CineComp = CameraActor->GetCineCameraComponent();
-	if (!CineComp)
-	{
-		return;
-	}
+	if (!CineComp) return;
 
 	// 提取相机物理参数
 	OutCameraData.FocalLength = CineComp->CurrentFocalLength;
@@ -118,8 +112,8 @@ void FSequenceAlgorithmUtils::CollectCheckedStaticMeshData(
 		const FString& FolderName = FolderMenuItem.Name.ToString();
 		for (TActorIterator<AActor> It(World); It; ++It)
 		{
-			if (const AStaticMeshActor* SMActor = Cast<AStaticMeshActor>(*It); SMActor && !SMActor->
-				IsPendingKillPending() &&
+			if (const AStaticMeshActor* SMActor = Cast<AStaticMeshActor>(*It);
+				SMActor && !SMActor->IsPendingKillPending() &&
 				SMActor->GetFolderPath().ToString() == FolderName)
 			{
 				FStaticMeshData MeshData;
@@ -130,8 +124,10 @@ void FSequenceAlgorithmUtils::CollectCheckedStaticMeshData(
 				MeshData.Scale = SMActor->GetActorScale3D();
 				MeshData.WorldMatrix = SMActor->GetActorTransform().ToMatrixWithScale(); // 4×4变换矩阵
 				MeshData.LocalVertices.Empty();
+				MeshData.FaceSamplePoints.Empty();
+				MeshData.ActorPointer = const_cast<AStaticMeshActor*>(SMActor);
 
-				// 获取 StaticMesh 局域顶点坐标
+				// 获取 StaticMesh 局域坐标
 				if (const UStaticMeshComponent* MeshComp = SMActor->GetStaticMeshComponent())
 				{
 					if (UStaticMesh* StaticMesh = MeshComp->GetStaticMesh())
@@ -140,15 +136,43 @@ void FSequenceAlgorithmUtils::CollectCheckedStaticMeshData(
 						if (StaticMesh->GetRenderData() && StaticMesh->GetRenderData()->LODResources.Num() > 0)
 						{
 							const FStaticMeshLODResources& LODResource = StaticMesh->GetRenderData()->LODResources[0];
-							const FPositionVertexBuffer& PositionBuffer = LODResource.VertexBuffers.
-								PositionVertexBuffer;
+							const FPositionVertexBuffer& PositionBuffer = LODResource.VertexBuffers.PositionVertexBuffer;
 							const int32 NumRenderVertices = PositionBuffer.GetNumVertices();
-
+							
+							// 1. 顶点坐标
 							for (int32 i = 0; i < NumRenderVertices; ++i)
 							{
-								MeshData.LocalVertices.Add(PositionBuffer.VertexPosition(i));
+								MeshData.LocalVertices.Add(FVector(PositionBuffer.VertexPosition(i)));
 							}
-						}
+							
+							// 2. 三角面重心均匀采样（面内采样点）
+							TArray<uint32> Indices;
+							LODResource.IndexBuffer.GetCopy(Indices);
+							
+							if (Indices.Num() >= 3)
+							{
+								for (int32 TriIdx = 0; TriIdx + 2 < Indices.Num(); TriIdx += 3)
+								{
+									constexpr int SampleN = 10;  // 密度，越高面内采样点越多
+									const FVector V0 = FVector(PositionBuffer.VertexPosition(Indices[TriIdx]));
+									const FVector V1 = FVector(PositionBuffer.VertexPosition(Indices[TriIdx + 1]));
+									const FVector V2 = FVector(PositionBuffer.VertexPosition(Indices[TriIdx + 2]));
+
+									for (int i = 0; i <= SampleN; ++i)
+									{
+										for (int j = 0; j <= SampleN - i; ++j)
+										{
+											int k = SampleN - i - j;
+											float a = static_cast<float>(i) / SampleN;
+											float b = static_cast<float>(j) / SampleN;
+											float c = static_cast<float>(k) / SampleN;
+											FVector P = a * V0 + b * V1 + c * V2;
+											MeshData.FaceSamplePoints.Add(P);
+										}
+									}
+								}
+							}
+                        }
 					}
 				}
 				OutMeshArray.Add(MeshData);
@@ -175,110 +199,141 @@ void FSequenceAlgorithmUtils::CollectCheckedStaticMeshData(
 		       MeshData.Scale.Z);
 		UE_LOG(LogTemp, Log, TEXT("    Matrix:   %s"), *MeshData.WorldMatrix.ToString());
 		// constexpr int32 MaxPrintCount = 5;
+		// // 打印局域顶点
+		// UE_LOG(LogTemp, Log, TEXT("    Local Vertex Total Count: %d"), MeshData.LocalVertices.Num());
 		// for (int32 i = 0; i < FMath::Min(MeshData.LocalVertices.Num(), MaxPrintCount); ++i)
 		// {
-		//     const FVector3f& LocalVertexF = MeshData.LocalVertices[i];
-		//     const FVector Vertex((double)LocalVertexF.X, (double)LocalVertexF.Y, (double)LocalVertexF.Z);
-		//
-		//     UE_LOG(LogTemp, Log, TEXT("    LocalVertex[%d]: (%.2f, %.2f, %.2f)"), i, Vertex.X, Vertex.Y, Vertex.Z);
+		// 	const FVector& LocalVertex = MeshData.LocalVertices[i];
+		// 	UE_LOG(LogTemp, Log, TEXT("        LocalVertex[%d]: (%.2f, %.2f, %.2f)"), i, LocalVertex.X, LocalVertex.Y, LocalVertex.Z);
 		// }
-		// UE_LOG(LogTemp, Log, TEXT("    Local Vertex Total Count: %d"), MeshData.LocalVertices.Num());
+		// // 打印面内采样点
+		// UE_LOG(LogTemp, Log, TEXT("    Face Sample Point Total Count: %d"), MeshData.FaceSamplePoints.Num());
+		// for (int32 i = 0; i < FMath::Min(MeshData.FaceSamplePoints.Num(), MaxPrintCount); ++i)
+		// {
+		// 	const FVector& SamplePt = MeshData.FaceSamplePoints[i];
+		// 	UE_LOG(LogTemp, Log, TEXT("        FaceSamplePoint[%d]: (%.2f, %.2f, %.2f)"), i, SamplePt.X, SamplePt.Y, SamplePt.Z);
+		// }
 	}
 }
 
-void FSequenceAlgorithmUtils::ProjectMeshVerticesToCameraPlane(
+void FSequenceAlgorithmUtils::ProjectMeshVisiblePixels(
 	const FCineCameraData& CameraData,
 	const TArray<FStaticMeshData>& MeshArray,
-	TMap<FName, FMeshBoundsData>& MeshBoundsMap) const
+	TMap<FName, FMeshBoundsData>& MeshBoundsMap,
+	const float MaximumDistance,
+	const UWorld* World
+) const
 {
 	// 清空旧的 MeshBoundsMap，确保每帧只存当前帧数据
 	MeshBoundsMap.Empty();
+	// 单位转换：m → cm
+	const float MaxDistanceCm = MaximumDistance * 100.0f;
 
-	// 相机世界变换
-	const FTransform CamTransform(CameraData.Rotation, CameraData.Location);
-	const FTransform CamInvTransform = CamTransform.Inverse();
-
+	// 遍历所有 Mesh
 	for (const FStaticMeshData& MeshData : MeshArray)
 	{
-		UE_LOG(LogTemp, Log, TEXT("==== Camera: %s 与 Mesh: %s ===="), *CameraData.Label, *MeshData.Label);
+		if (!MeshData.ActorPointer) continue;
 
-		float LocalNormXMin = FLT_MAX;
-		float LocalNormXMax = -FLT_MAX;
-		float LocalNormYMin = FLT_MAX;
-		float LocalNormYMax = -FLT_MAX;
-
-		for (int32 i = 0; i < MeshData.LocalVertices.Num(); ++i)
+		// |SMA世界坐标 - Camera世界坐标| > 最大检测距离
+		if (const float Dist = FVector::Dist(MeshData.Location, CameraData.Location); Dist > MaxDistanceCm)
 		{
-			// 1：StaticMesh 坐标变换（cm）
-			FVector LocalVertex = FVector(MeshData.LocalVertices[i]);
-			FVector WorldPos = MeshData.WorldMatrix.TransformPosition(LocalVertex);
-			const FVector VertexCameraSpace = CamInvTransform.TransformPosition(WorldPos);
+			UE_LOG(LogTemp, Warning, TEXT("Mesh [%s] 距离相机 %.2f m，超过最大检测距离 %.2f m，跳过"), *MeshData.Label, Dist / 100.0f, MaximumDistance);
+			continue;  // 跳过本 Mesh
+		}
+		
+ 		UE_LOG(LogTemp, Log, TEXT("==== Camera: %s 与 Mesh: %s ===="), *CameraData.Label, *MeshData.Label);
 
-			UE_LOG(LogTemp, Log,
-			       TEXT("   顶点[%d]: 局域坐标(%.2f, %.2f, %.2f) → 世界坐标(%.2f, %.2f, %.2f) → 相机坐标(%.2f, %.2f, %.2f)"),
-			       i,
-			       LocalVertex.X, LocalVertex.Y, LocalVertex.Z,
-			       WorldPos.X, WorldPos.Y, WorldPos.Z,
-			       VertexCameraSpace.X, VertexCameraSpace.Y, VertexCameraSpace.Z);
+		TArray<FVector2D> VisibleNormXY;
+		TArray<FVector> AllSamplePoints = MeshData.LocalVertices;
+		AllSamplePoints.Append(MeshData.FaceSamplePoints);
+		// 可见性判定：局域顶点+面内采样点
+		for (const FVector& LocalPt : AllSamplePoints)
+		{
+			FVector WorldPt = MeshData.WorldMatrix.TransformPosition(LocalPt);
 
-			// 2：投影变化（相似三角形计算）cm
-			if (VertexCameraSpace.X > 0.f) // Camera 局域坐标系：X > 0 表示在相机前方
+			// SphereTrace：防止浮点误差
+			constexpr float SphereRadius = 0.2f; // 越大射线越粗
+			FHitResult HitResult;  // 用于存储射线检测碰撞结果
+			const bool bHit = World->SweepSingleByChannel(
+				HitResult,
+				CameraData.Location,
+				WorldPt,
+				FQuat::Identity,
+				ECC_Visibility,
+				FCollisionShape::MakeSphere(SphereRadius)
+			);
+			
+			// 命中的 Mesh 是当前遍历 Mesh
+			if (bHit && HitResult.GetActor() == MeshData.ActorPointer)
 			{
-				// 成像平面坐标 cm
-				const float ImagePlaneX = F * (VertexCameraSpace.Y / VertexCameraSpace.X);
-				const float ImagePlaneY = F * (VertexCameraSpace.Z / VertexCameraSpace.X);
-
-				// 图片默认坐标系 cm
-				const float ImageX = ImagePlaneX + HalfW;
-				const float ImageY = HalfH - ImagePlaneY;
-
-				// 归一化（0-1范围）cm
-				const float NormX = ImageX / (2.0f * HalfW);
-				const float NormY = ImageY / (2.0f * HalfH);
-
-				UE_LOG(LogTemp, Log, TEXT("           成像平面坐标(%.2f, %.2f) → 图片默认坐标系(%.2f, %.2f) → 归一化坐标(%.2f, %.2f)"),
-				       ImagePlaneX, ImagePlaneY, ImageX, ImageY, NormX, NormY);
-
-				LocalNormXMin = FMath::Min(LocalNormXMin, NormX);
-				LocalNormXMax = FMath::Max(LocalNormXMax, NormX);
-				LocalNormYMin = FMath::Min(LocalNormYMin, NormY);
-				LocalNormYMax = FMath::Max(LocalNormYMax, NormY);
+				if (FVector2D NormXY; ProjectWorldPointToImagePlane(WorldPt, CameraData, NormXY)) {
+					UE_LOG(LogTemp, Log, TEXT("   [%s] 归一化投影坐标: (%.3f, %.3f)"), *MeshData.Label, NormXY.X, NormXY.Y);
+					VisibleNormXY.Add(NormXY);
+				} else {
+					UE_LOG(LogTemp, Warning, TEXT("   [%s] 投影点被丢弃，归一化坐标超出画面: (%.3f, %.3f)"), *MeshData.Label, NormXY.X, NormXY.Y);
+				}
 			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("           [被剔除：X <= 0]"));
+			else if (bHit) {
+				UE_LOG(LogTemp, Warning, TEXT("   [%s] 采样命中其他物体: %s"), *MeshData.Label, *GetNameSafe(HitResult.GetActor()));
+			}
+			else { // Mesh 未添加碰撞体
+				UE_LOG(LogTemp, Warning, TEXT("   [%s] 采样射线未命中任何物体"), *MeshData.Label);
 			}
 		}
-
-		// Step 1: 判断是否完全越界（均小于0或均大于1直接舍弃）
-		if (LocalNormXMax < 0.f || LocalNormXMin > 1.f || LocalNormYMax < 0.f || LocalNormYMin > 1.f)
+		
+		if (VisibleNormXY.Num() > 0)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("   %s Mesh 超出成像平面，舍弃。"), *MeshData.Label);
-			continue; // 舍弃本 mesh
-		}
-
-		// Step 2: 修正边界到 [0, 1] 范围
-		const float ClampedNormXMin = FMath::Clamp(LocalNormXMin, 0.f, 1.f);
-		const float ClampedNormXMax = FMath::Clamp(LocalNormXMax, 0.f, 1.f);
-		const float ClampedNormYMin = FMath::Clamp(LocalNormYMin, 0.f, 1.f);
-		const float ClampedNormYMax = FMath::Clamp(LocalNormYMax, 0.f, 1.f);
-
-		// Step 3: 存入 MeshBoundsMap
-		MeshBoundsMap.Add(
-			MeshData.Name,
-			FMeshBoundsData(
+			// 初始化
+			float XMin = TNumericLimits<float>::Max();
+			float XMax = TNumericLimits<float>::Lowest();
+			float YMin = TNumericLimits<float>::Max();
+			float YMax = TNumericLimits<float>::Lowest();
+			// 获取最大最小 X、Y
+			for (const FVector2D& UV : VisibleNormXY)
+			{
+				XMin = FMath::Min(XMin, UV.X);
+				XMax = FMath::Max(XMax, UV.X);
+				YMin = FMath::Min(YMin, UV.Y);
+				YMax = FMath::Max(YMax, UV.Y);
+			}
+			MeshBoundsMap.Add(
 				MeshData.Name,
-				MeshData.Label,
-				ClampedNormXMin,
-				ClampedNormXMax,
-				ClampedNormYMin,
-				ClampedNormYMax
-			)
-		);
-
-		UE_LOG(LogTemp, Log, TEXT("   边界统计: %s NormXMin=%.3f, NormXMax=%.3f, NormYMin=%.3f, NormYMax=%.3f"),
-		       *MeshData.Label, ClampedNormXMin, ClampedNormXMax, ClampedNormYMin, ClampedNormYMax);
+				FMeshBoundsData(MeshData.Name, MeshData.Label, XMin, XMax, YMin, YMax, VisibleNormXY)
+			);
+			UE_LOG(LogTemp, Log, TEXT("   [%s] 可见包围盒: (%.3f, %.3f)-(%.3f, %.3f)"), *MeshData.Label, XMin, XMax, YMin, YMax);
+		}
 	}
+}
+
+bool FSequenceAlgorithmUtils::ProjectWorldPointToImagePlane(const FVector& WorldPoint, const FCineCameraData& CameraData, FVector2D& OutNormXY) const
+{
+	// 1：StaticMesh 坐标变换（cm）
+	const FTransform CamTransform(CameraData.Rotation, CameraData.Location);
+	// 基于相机坐标系的 Mesh 坐标
+	const FVector VertexCameraSpace = CamTransform.InverseTransformPosition(WorldPoint);
+	
+	// 2：投影变化（相似三角形计算）cm
+	if (VertexCameraSpace.X <= 0) return false; // 位于相机后方
+	// 成像平面坐标 cm
+	const float ImagePlaneX = F * (VertexCameraSpace.Y / VertexCameraSpace.X);
+	const float ImagePlaneY = F * (VertexCameraSpace.Z / VertexCameraSpace.X);
+
+	// 图片默认坐标系 cm
+	const float ImageX = ImagePlaneX + HalfW;
+	const float ImageY = HalfH - ImagePlaneY;
+
+	// 归一化（0-1范围）cm
+	const float NormX = ImageX / (2.0f * HalfW);
+	const float NormY = ImageY / (2.0f * HalfH);
+
+	OutNormXY.X = NormX;
+	OutNormXY.Y = NormY;
+
+	// 超出成像面范围返回 false
+	if (NormX < 0.f || NormX > 1.f || NormY < 0.f || NormY > 1.f)
+		return false;
+
+	return true;
 }
 
 EImageFormat FSequenceAlgorithmUtils::GetImageFormat(const FString& FilePath,
@@ -354,8 +409,8 @@ void FSequenceAlgorithmUtils::CalculateMeshPixelBounds(
 		const FMeshBoundsData& MeshData = MeshPair.Value;
 		const float XRange = MeshData.NormXMax - MeshData.NormXMin;
 		const float YRange = MeshData.NormYMax - MeshData.NormYMin;
-		const float XThreshold = ImageMeta.Width * 0.00001f; // 0.001% 的阈值
-		const float YThreshold = ImageMeta.Height * 0.00001f;
+		const float XThreshold = ImageMeta.Width * 1E-07; // 0.00001% 的阈值
+		const float YThreshold = ImageMeta.Height * 1E-07;
 
 		if (XRange >= XThreshold && YRange >= YThreshold)
 		{
@@ -383,6 +438,8 @@ void FSequenceAlgorithmUtils::CalculateMeshPixelBounds(
 			PixelBound.CenterY = (PixelBound.YMinPixel + PixelBound.YMaxPixel) * 0.5f;
 			PixelBound.BoxWidth = PixelBound.XMaxPixel - PixelBound.XMinPixel;
 			PixelBound.BoxHeight = PixelBound.YMaxPixel - PixelBound.YMinPixel;
+			// 局域顶点、面内采样点
+			PixelBound.LocalPoints = MeshData.LocalPoints; 
 			ImageMeta.PixelBoundsArray.Add(PixelBound);
 
 			UE_LOG(LogTemp, Log, TEXT("   %s Mesh: XMin=%.2f, XMax=%.2f, YMin=%.2f, YMax=%.2f"),
@@ -409,8 +466,7 @@ void FSequenceAlgorithmUtils::CopyOriginalImageToImagesDir(const FString& SrcIma
 {
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 	FString ImageFileName = FPaths::GetCleanFilename(SrcImagePath);
-	FString DstImagePath = FPaths::Combine(ImagesDir, ImageFileName);
-	if (!PlatformFile.FileExists(*DstImagePath))
+	if (const FString DstImagePath = FPaths::Combine(ImagesDir, ImageFileName); !PlatformFile.FileExists(*DstImagePath))
 	{
 		PlatformFile.CopyFile(*DstImagePath, *SrcImagePath);
 	}
@@ -451,7 +507,8 @@ cv::Scalar FSequenceAlgorithmUtils::GetColorForCategory(const FName& CategoryNam
 		{FName("Atest"), cv::Scalar(255, 0, 0)}, // 蓝色
 		{FName("Atest2"), cv::Scalar(0, 255, 0)}, // 绿色
 		{FName("Atest3"), cv::Scalar(0, 0, 255)}, // 红色
-		// 其他默认类别颜色
+		{FName("Atest4"), cv::Scalar(0, 255, 255)}, // 黄色
+		// 其他默认类别颜色...
 	};
 	if (const cv::Scalar* FoundColor = ColorMap.Find(CategoryName))
 		return *FoundColor;
@@ -473,6 +530,7 @@ void FSequenceAlgorithmUtils::SavePixelBoundsImage(const FString& SaveDirectoryP
 
 	for (const FPixelBoundResult& PixelBound : ImageMeta.PixelBoundsArray)
 	{
+		// float → int
 		const int Xmin = FMath::RoundToInt(PixelBound.XMinPixel);
 		const int Xmax = FMath::RoundToInt(PixelBound.XMaxPixel);
 		const int Ymin = FMath::RoundToInt(PixelBound.YMinPixel);
@@ -496,12 +554,12 @@ void FSequenceAlgorithmUtils::SavePixelBoundsImage(const FString& SaveDirectoryP
 		constexpr int Thickness = 2;
 		int Baseline = 0;
 		std::string LabelStr = TCHAR_TO_UTF8(*PixelBound.CategoryLabel);
-
+  
 		// 获取文字尺寸
 		const cv::Size TextSize = cv::getTextSize(LabelStr, FontFace, FontScale, Thickness, &Baseline);
 		const int RectWidth = TextSize.width + 8;
 		const int RectHeight = TextSize.height + 8;
-
+  
 		// 绘制背景小矩形
 		cv::rectangle(
 			Img,
@@ -510,12 +568,12 @@ void FSequenceAlgorithmUtils::SavePixelBoundsImage(const FString& SaveDirectoryP
 			BoxColor,
 			cv::FILLED
 		);
-
+  
 		// 文字颜色可自适应（简单示例：深色框用白字）
 		const cv::Scalar TextColor = (BoxColor[0] + BoxColor[1] + BoxColor[2] > 400)
                  ? cv::Scalar(0, 0, 0)
                  : cv::Scalar(255, 255, 255);
-
+  
 		// 写文字
 		cv::putText(
 			Img,
@@ -526,6 +584,17 @@ void FSequenceAlgorithmUtils::SavePixelBoundsImage(const FString& SaveDirectoryP
 			TextColor,
 			2
 		);
+		
+		// // 4. 画采样点
+		// for (const FVector2D& Pt : PixelBound.LocalPoints)
+		// {
+		// 	const int Px = FMath::RoundToInt(Pt.X * Img.cols);
+		// 	const int Py = FMath::RoundToInt(Pt.Y * Img.rows);
+		// 	if (Px >= 0 && Px < Img.cols && Py >= 0 && Py < Img.rows)
+		// 	{
+		// 		cv::circle(Img, cv::Point(Px, Py), 4, cv::Scalar(0, 0, 255), cv::FILLED);
+		// 	}
+		// }
 	}
 
 	// 保存处理后的图片
@@ -535,6 +604,7 @@ void FSequenceAlgorithmUtils::SavePixelBoundsImage(const FString& SaveDirectoryP
 void FSequenceAlgorithmUtils::DoLabelingForFrame(
 	const FName& CameraMenuRadioButton,
 	const TArray<FMenuItem>& CheckedFolders,
+	float MaximumDistance,
 	FImageMetadata& ImageMeta,
 	const FString& SavePath)
 {
@@ -542,6 +612,8 @@ void FSequenceAlgorithmUtils::DoLabelingForFrame(
 	TArray<FStaticMeshData> MeshArray;
 	// 存储 Mesh 对应于的 Folder 信息
 	TMap<FName, FMenuItem> MeshFolderMap;
+	// 用可见性剔除的包围盒
+	UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
 	// 存储 Mesh 的边界数据
 	TMap<FName, FMeshBoundsData> MeshBoundsMap;
 	// 标注前、标注后
@@ -550,8 +622,9 @@ void FSequenceAlgorithmUtils::DoLabelingForFrame(
 
 	CollectCheckedCineCameraData(CameraMenuRadioButton, CameraData);
 	CollectCheckedStaticMeshData(CheckedFolders, MeshArray, MeshFolderMap);
-	ProjectMeshVerticesToCameraPlane(CameraData, MeshArray, MeshBoundsMap);
 
+	ProjectMeshVisiblePixels(CameraData, MeshArray, MeshBoundsMap, MaximumDistance, World);
+	
     UE_LOG(LogTemp, Log, TEXT("[图片: %s] 宽=%d, 高=%d"), *ImageMeta.Label, ImageMeta.Width, ImageMeta.Height);
     CalculateMeshPixelBounds(ImageMeta, MeshBoundsMap, MeshFolderMap);
 

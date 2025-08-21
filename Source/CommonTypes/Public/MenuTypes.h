@@ -11,10 +11,10 @@ enum class EItemType : uint8
 
 struct FMenuItem
 {
-	EItemType Type; // 类型标记
-	FName Name; // 唯一标识（方便反查、传递）
-	FString Label; // 显示名称：Camera / Folder
-	int32 FolderAlias; // Folder 别名（数字），用于 txt 存储
+	EItemType Type;            // 类型标记
+	FName Name;                // 唯一标识（方便反查、传递）
+	FString Label;             // 显示名称：Camera / Folder
+	int32 FolderAlias;         // Folder 别名（数字），用于 txt 存储
 	ECheckBoxState CheckState; // 被选中状态（复选框）
 	// 可扩展其他字段...
 
@@ -96,14 +96,18 @@ struct FStaticMeshData : FMeshBaseData
 	FRotator Rotation;
 	FVector Scale;
 	FMatrix WorldMatrix;
-	TArray<FVector3f> LocalVertices; // StaticMesh 局域顶点坐标 cm
+	TArray<FVector> LocalVertices; // StaticMesh 局域顶点坐标 cm
+	TArray<FVector> FaceSamplePoints; // StaticMesh 局部面内采样点/坐标 cm
+	AStaticMeshActor* ActorPointer; // 用于判断 StaticMeshActor 可见性
 
 	FStaticMeshData()
 		: Location(FVector::ZeroVector)
-		  , Rotation(FRotator::ZeroRotator)
-		  , Scale(FVector::OneVector)
-		  , WorldMatrix(FMatrix::Identity)
-		  , LocalVertices(TArray<FVector3f>())
+		, Rotation(FRotator::ZeroRotator)
+		, Scale(FVector::OneVector)
+		, WorldMatrix(FMatrix::Identity)
+		, LocalVertices(TArray<FVector>())
+		, FaceSamplePoints(TArray<FVector>())
+		, ActorPointer(nullptr)
 	{
 	}
 };
@@ -115,14 +119,17 @@ struct FMeshBoundsData : FMeshBaseData
 	float NormXMax;
 	float NormYMin;
 	float NormYMax;
+	
+	TArray<FVector2D> LocalPoints; // 局域顶点、面内采样点 cm
 
 	// 构造函数
 	FMeshBoundsData(const FName InName, const FString& InLabel,
 	                const float InNormXMin, const float InNormXMax,
-	                const float InNormYMin, const float InNormYMax)
+	                const float InNormYMin, const float InNormYMax, const TArray<FVector2D>& InLocalPoints)
 		: FMeshBaseData(InName, InLabel)
-		  , NormXMin(InNormXMin), NormXMax(InNormXMax)
-		  , NormYMin(InNormYMin), NormYMax(InNormYMax)
+		, NormXMin(InNormXMin), NormXMax(InNormXMax)
+		, NormYMin(InNormYMin), NormYMax(InNormYMax)
+		, LocalPoints(InLocalPoints)
 	{
 	}
 };
@@ -144,6 +151,8 @@ struct FPixelBoundResult : FMeshBaseData
 	float BoxWidth; // 框宽 px
 	float BoxHeight; // 框高 px
 
+	TArray<FVector2D> LocalPoints; // 局域顶点、面内采样点 cm
+
 	FPixelBoundResult() = default;
 };
 
@@ -156,7 +165,7 @@ struct FImageMetadata
 	int32 Width; // 图宽 px
 	int32 Height; // 图高 px
 	TArray<FPixelBoundResult> PixelBoundsArray; // 多个像素坐标边界
-
+	
 	FImageMetadata(const FString& InName, const FString& InLabel, const int32 InWidth, const int32 InHeight)
 		: Name(InName)
 		  , Label(InLabel)

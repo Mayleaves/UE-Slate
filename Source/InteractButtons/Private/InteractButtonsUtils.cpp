@@ -221,7 +221,7 @@ void SInteractButtonsUtils::InitializeLabelingOptions()
 		FOnGetDetailCustomizationInstance::CreateStatic(&FLabelingOptionsDetailsCustomization::MakeInstance)
 	);
 	
-	LabelingSettingObject = NewObject<ULabelingOptionsData>();  // LabelingSettingObject->MaximumDistance
+	LabelingSettingObject = NewObject<ULabelingOptionsData>();
 	LabelingOptionsWidget->SetObject(LabelingSettingObject.Get());
 }
 
@@ -973,7 +973,7 @@ TSharedRef<SWindow> SInteractButtonsUtils::CreateLabelManagerWindow()
 	// 弹窗
 	TSharedRef<SWindow> Window = SNew(SWindow)
 		.Title(FText::FromString(TEXT("Label Management")))
-		.ClientSize(FVector2D(500, 370))
+		.ClientSize(FVector2D(500, 400))
 		.SupportsMinimize(true)
 		.SupportsMaximize(true) // 最大化窗口
 		.FocusWhenFirstShown(true)
@@ -1656,6 +1656,7 @@ void SInteractButtonsUtils::DoLabelingStep()
 	AlgorithmUtils.DoLabelingForFrame(
 		CameraMenuRadioButton,
 		CheckedFolders,
+		LabelingSettingObject->MaximumDistance,
 		ImageMeta,
 		SavePath
 	);

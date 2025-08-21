@@ -15,6 +15,7 @@ public:
 	void DoLabelingForFrame(
 		const FName& CameraMenuRadioButton,
 		const TArray<FMenuItem>& CheckedFolders,
+		float MaximumDistance,
 		FImageMetadata& ImageMeta,
 		const FString& SavePath);
 
@@ -24,9 +25,17 @@ private:
 		const TArray<FMenuItem>& FolderMenuItems,
 		TArray<FStaticMeshData>& OutMeshArray,
 		TMap<FName, FMenuItem>& OutMeshFolderMap);
-	// 将 Mesh 顶点投影到成像平面
-	void ProjectMeshVerticesToCameraPlane(const FCineCameraData& CameraData, const TArray<FStaticMeshData>& MeshArray,
-	                                      TMap<FName, FMeshBoundsData>& MeshBoundsMap) const;
+
+	// Mesh可见像素包围盒（遮挡剔除）
+	void ProjectMeshVisiblePixels(
+		const FCineCameraData& CameraData,
+		const TArray<FStaticMeshData>& MeshArray,
+		TMap<FName, FMeshBoundsData>& MeshBoundsMap,
+		float MaximumDistance,
+		const UWorld* World
+	) const;
+	// 世界点投影到归一化成像面(0-1)
+	bool ProjectWorldPointToImagePlane(const FVector& WorldPoint, const FCineCameraData& CameraData, FVector2D& OutNormXY) const;
 
 	float MMToCm = 0.1f;
 	float HalfW = 0, HalfH = 0, F = 0; // 成像平面物理尺寸
