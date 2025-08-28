@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class FLevelSequenceUtils : public IModuleInterface
+class FLevelSequenceUtils final : public IModuleInterface
 {
 public:
 	virtual void StartupModule() override;

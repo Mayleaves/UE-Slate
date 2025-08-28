@@ -5,7 +5,7 @@
 #include "UObject/ObjectMacros.h"
 #include "LabelingOptionsData.generated.h"
 
-// 用于CineCamera采集最大距离范围内StaticMesh的设置数据
+// 用于 CineCamera 采集最大距离范围内 StaticMesh 的设置数据
 UCLASS()
 class INTERACTBUTTONS_API ULabelingOptionsData : public UObject
 {

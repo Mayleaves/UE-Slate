@@ -54,8 +54,7 @@ void FSyntheticDataFactoryModule::StartupModule()
 	                        // Set icons for tabs.
 	                        .SetIcon(FSlateIcon(FSyntheticDataFactoryStyle::GetStyleSetName(),
 	                                            "SyntheticDataFactory.OpenPluginWindow"));
-
-	// todo 以下部分为新增内容
+	
 	// 初始化 PipelineQueue
 	InitializePipelineQueue();
 
@@ -81,7 +80,6 @@ void FSyntheticDataFactoryModule::ShutdownModule()
 
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(SyntheticDataFactoryTabName);
 
-	// todo 以下部分为新增内容
 	// 注销监听
 	if (ISequencerModule* SequencerModule = FModuleManager::GetModulePtr<ISequencerModule>("Sequencer"))
 	{

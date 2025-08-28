@@ -130,8 +130,7 @@ void FMyOutputFormatDetailsCustomization::AddDirectoryPropertyRow(
 			.ButtonStyle(FAppStyle::Get(), "SimpleButton")
 			.ToolTipText(OpenButtonToolTip)
 			.OnClicked_Lambda([DirData, GetPathFunc]() {
-				const FString Path = GetPathFunc(DirData);
-				if (!Path.IsEmpty())
+				if (const FString Path = GetPathFunc(DirData); !Path.IsEmpty())
 					FPlatformProcess::ExploreFolder(*Path);
 				return FReply::Handled();
 			})

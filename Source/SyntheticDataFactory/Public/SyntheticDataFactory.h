@@ -30,7 +30,6 @@ private:
 	TSharedPtr<class FUICommandList> PluginCommands;
 
 private:
-	// todo 以下部分为新增内容
 	UPROPERTY() // 宏，标记反射属性
 	UMoviePipelineExecutorJob* CurrentJob; // 当前 Sequencer 下的 Job
 

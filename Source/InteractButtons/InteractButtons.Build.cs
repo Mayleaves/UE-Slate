@@ -53,7 +53,6 @@ public class InteractButtons : ModuleRules
 				"Sequencer", 
 				"EditorScriptingUtilities",
 				"CinematicCamera",
-				"CommonTypes",
 				"DesktopPlatform",
 				"DesktopWidgets",
 				"EditorWidgets",
